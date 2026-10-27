@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Tenant;
+use App\Tenancy\CurrentTenant;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -15,7 +18,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->scoped(CurrentTenant::class);
     }
 
     /**
@@ -24,6 +27,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureTenantRouteBinding();
+    }
+
+    /**
+     * Resolve the {tenant} route parameter by slug (404 if it doesn't exist).
+     */
+    protected function configureTenantRouteBinding(): void
+    {
+        Route::bind('tenant', fn (string $value): Tenant => Tenant::where('slug', $value)->firstOrFail());
     }
 
     /**
