@@ -50,6 +50,6 @@ it('generates tenant urls without passing the slug explicitly', function () {
 
 it('shares a null tenant outside tenant routes', function () {
     $this->actingAs($this->member)
-        ->get(route('dashboard'))
+        ->get(route('profile.edit'))
         ->assertInertia(fn (Assert $page) => $page->where('tenant', null));
 });
