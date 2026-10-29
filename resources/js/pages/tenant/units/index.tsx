@@ -44,6 +44,7 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
                                 <th className="py-2">Tipo</th>
                                 <th className="py-2 text-right">m²</th>
                                 <th className="py-2 text-right">Precio/mes</th>
+                                <th className="py-2" />
                             </tr>
                         </thead>
                         <tbody>
@@ -60,6 +61,17 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
                                         {euros.format(
                                             unit.monthly_price_cents / 100,
                                         )}
+                                    </td>
+                                    <td className="py-2 text-right">
+                                        <Link
+                                            href={UnitController.edit({
+                                                tenant: tenant?.slug,
+                                                unit: unit.id,
+                                            })}
+                                            className="text-sm underline underline-offset-4"
+                                        >
+                                            Editar
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}
