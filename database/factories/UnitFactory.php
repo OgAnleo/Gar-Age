@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UnitType;
 use App\Models\Tenant;
 use App\Models\Unit;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,7 +22,7 @@ class UnitFactory extends Factory
         return [
             'tenant_id' => Tenant::factory(),
             'code' => fake()->unique()->bothify('?-##'),
-            'type' => fake()->randomElement(['garage', 'storage']),
+            'type' => fake()->randomElement(UnitType::cases()),
             'size_m2' => fake()->randomFloat(2, 2, 30),
             'monthly_price_cents' => fake()->numberBetween(2500, 15000),
         ];
