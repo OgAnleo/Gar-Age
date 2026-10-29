@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Tenant;
 
+use App\Enums\UnitType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenant\StoreUnitRequest;
 use App\Models\Unit;
@@ -28,6 +29,16 @@ class UnitController extends Controller
                     'size_m2' => $unit->size_m2,
                     'monthly_price_cents' => $unit->monthly_price_cents,
                 ]),
+        ]);
+    }
+
+    /**
+     * Show the form to create a unit.
+     */
+    public function create(): Response
+    {
+        return Inertia::render('tenant/units/create', [
+            'types' => UnitType::options(),
         ]);
     }
 

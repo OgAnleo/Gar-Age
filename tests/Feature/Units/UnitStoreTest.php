@@ -1,8 +1,10 @@
 <?php
 
+use App\Enums\UnitType;
 use App\Models\Tenant;
 use App\Models\Unit;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
     $this->tenant = Tenant::factory()->create();
@@ -16,6 +18,17 @@ beforeEach(function () {
         'size_m2' => '12.5',
         'monthly_price' => '79.99',
     ];
+});
+
+it('shows the create form with the unit types', function () {
+    $this->actingAs($this->member)
+        ->get("{$this->url}/create")
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('tenant/units/create')
+            ->has('types', count(UnitType::cases()))
+            ->where('types.0', ['value' => 'garage', 'label' => 'Garaje'])
+        );
 });
 
 it('creates a unit for the current tenant', function () {

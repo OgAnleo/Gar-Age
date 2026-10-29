@@ -12,6 +12,6 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('{tenant}')->middleware('tenant')->name('tenant.')->group(function () {
     Route::middleware(['auth', 'verified', 'tenant.member'])->group(function () {
         Route::inertia('dashboard', 'tenant/dashboard')->name('dashboard');
-        Route::resource('units', UnitController::class)->only(['index', 'store']);
+        Route::resource('units', UnitController::class)->only(['index', 'create', 'store']);
     });
 });
