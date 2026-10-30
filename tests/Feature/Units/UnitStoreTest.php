@@ -1,9 +1,9 @@
 <?php
 
-use App\Enums\UnitType;
 use App\Models\Tenant;
 use App\Models\Unit;
 use App\Models\User;
+use GarAge\Units\Domain\UnitType;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {

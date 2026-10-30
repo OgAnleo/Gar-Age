@@ -36,11 +36,15 @@ it('requires a business name', function () {
 it('generates a unique slug when the name is taken', function () {
     Tenant::factory()->create(['slug' => 'trasteros-norte']);
 
-    expect(Tenant::generateUniqueSlug('Trasteros Norte'))->toBe('trasteros-norte-2');
+    $this->post(route('register.store'), registerPayload());
+
+    expect(Tenant::where('name', 'Trasteros Norte')->value('slug'))->toBe('trasteros-norte-2');
 });
 
 it('never generates a reserved slug', function () {
-    expect(Tenant::generateUniqueSlug('Settings'))->toBe('settings-2');
+    $this->post(route('register.store'), registerPayload(['business_name' => 'Settings']));
+
+    expect(Tenant::where('name', 'Settings')->value('slug'))->toBe('settings-2');
 });
 
 it('redirects /dashboard to the tenant dashboard of the user', function () {

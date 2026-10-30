@@ -2,8 +2,12 @@
 
 namespace App\Tenancy;
 
-use App\Models\Tenant;
+use GarAge\Tenancy\Domain\Tenant;
+use LogicException;
 
+/**
+ * The tenant of the current request (set by the IdentifyTenant middleware).
+ */
 class CurrentTenant
 {
     private ?Tenant $tenant = null;
@@ -20,6 +24,14 @@ class CurrentTenant
 
     public function id(): ?int
     {
-        return $this->tenant?->id;
+        return $this->tenant?->id->value;
+    }
+
+    /**
+     * The current tenant, for code that only runs inside tenant routes.
+     */
+    public function require(): Tenant
+    {
+        return $this->tenant ?? throw new LogicException('No current tenant: the route is missing the tenant middleware.');
     }
 }

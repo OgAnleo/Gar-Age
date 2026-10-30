@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enums\UnitType;
 use App\Models\Tenant;
 use App\Models\Unit;
+use GarAge\Units\Domain\UnitType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

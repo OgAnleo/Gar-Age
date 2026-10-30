@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
-use App\Models\Tenant;
 use App\Tenancy\CurrentTenant;
 use Carbon\CarbonImmutable;
+use GarAge\Tenancy\Application\ResolveTenant;
+use GarAge\Tenancy\Domain\Tenant;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -35,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureTenantRouteBinding(): void
     {
-        Route::bind('tenant', fn (string $value): Tenant => Tenant::where('slug', $value)->firstOrFail());
+        Route::bind('tenant', fn (string $value): Tenant => $this->app->make(ResolveTenant::class)->handle($value));
     }
 
     /**

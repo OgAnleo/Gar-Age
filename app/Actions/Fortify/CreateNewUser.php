@@ -4,8 +4,9 @@ namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
-use App\Models\Tenant;
 use App\Models\User;
+use GarAge\Shared\Domain\UserId;
+use GarAge\Tenancy\Application\RegisterBusiness;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -13,6 +14,8 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules, ProfileValidationRules;
+
+    public function __construct(private RegisterBusiness $registerBusiness) {}
 
     /**
      * Validate and create a newly registered user together with their tenant.
@@ -34,12 +37,7 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => $input['password'],
             ]);
 
-            $tenant = Tenant::create([
-                'name' => $input['business_name'],
-                'slug' => Tenant::generateUniqueSlug($input['business_name']),
-            ]);
-
-            $tenant->users()->attach($user, ['role' => 'owner']);
+            $this->registerBusiness->handle($input['business_name'], new UserId($user->id));
 
             return $user;
         });

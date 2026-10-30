@@ -1,7 +1,7 @@
 <?php
 
-use App\Enums\UnitType;
 use App\Models\Unit;
+use GarAge\Units\Domain\UnitType;
 
 it('casts type to the UnitType enum', function () {
     $unit = Unit::factory()->create(['type' => 'storage']);

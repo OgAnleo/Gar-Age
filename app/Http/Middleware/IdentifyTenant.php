@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Tenant;
 use App\Tenancy\CurrentTenant;
 use Closure;
+use GarAge\Tenancy\Domain\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +27,7 @@ class IdentifyTenant
 
         $this->currentTenant->set($tenant);
 
-        URL::defaults(['tenant' => $tenant->slug]);
+        URL::defaults(['tenant' => $tenant->slug->value]);
 
         $route->forgetParameter('tenant');
 

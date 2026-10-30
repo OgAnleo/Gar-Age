@@ -60,12 +60,4 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             ->withPivot('role')
             ->withTimestamps();
     }
-
-    /**
-     * Whether the user is a member of the given tenant.
-     */
-    public function belongsToTenant(Tenant $tenant): bool
-    {
-        return $this->tenants()->whereKey($tenant->id)->exists();
-    }
 }

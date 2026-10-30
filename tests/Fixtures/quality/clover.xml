@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1700000000">
+  <project timestamp="1700000000">
+    <file name="/project/app/Simple.php">
+      <class name="App\Simple" namespace="App">
+        <metrics complexity="1" methods="1" coveredmethods="1" statements="10" coveredstatements="10" elements="11" coveredelements="11"/>
+      </class>
+      <line num="10" type="method" name="easy" visibility="public" complexity="1" crap="1" count="1"/>
+      <line num="11" type="stmt" count="1"/>
+    </file>
+    <file name="/project/app/Messy.php">
+      <class name="App\Messy" namespace="App">
+        <metrics complexity="10" methods="2" coveredmethods="1" statements="30" coveredstatements="20" elements="32" coveredelements="21"/>
+      </class>
+      <line num="5" type="method" name="tangled" visibility="public" complexity="8" crap="72" count="0"/>
+      <line num="20" type="method" name="fine" visibility="public" complexity="2" crap="2" count="1"/>
+    </file>
+    <metrics files="2" loc="60" ncloc="50" classes="2" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="40" coveredstatements="30" elements="43" coveredelements="32"/>
+  </project>
+</coverage>

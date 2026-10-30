@@ -1,0 +1,13 @@
+{
+    "path": ["app", "src", "resources/js"],
+    "format": ["php", "typescript", "tsx"],
+    "ignore": [
+        "**/actions/**",
+        "**/routes/**",
+        "**/wayfinder/**",
+        "**/components/ui/**"
+    ],
+    "mode": "weak",
+    "reporters": ["json"],
+    "output": "build/quality"
+}

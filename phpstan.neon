@@ -9,5 +9,8 @@ parameters:
         - config/
         - database/
         - routes/
+        - scripts/
+        - src/
+        - tools/
 
     level: 7

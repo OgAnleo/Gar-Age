@@ -1,0 +1,5 @@
+{
+    "coverage_min": 70,
+    "duplication_max": 1,
+    "crap_max": 30
+}

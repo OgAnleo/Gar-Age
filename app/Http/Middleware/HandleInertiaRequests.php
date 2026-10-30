@@ -43,7 +43,21 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'tenant' => fn () => app(CurrentTenant::class)->get()?->only(['id', 'name', 'slug']),
+            'tenant' => fn () => $this->tenantProps(),
+        ];
+    }
+
+    /**
+     * @return array{id: int, name: string, slug: string}|null
+     */
+    private function tenantProps(): ?array
+    {
+        $tenant = app(CurrentTenant::class)->get();
+
+        return $tenant === null ? null : [
+            'id' => $tenant->id->value,
+            'name' => $tenant->name,
+            'slug' => $tenant->slug->value,
         ];
     }
 }

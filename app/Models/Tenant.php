@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Database\Factories\TenantFactory;
+use GarAge\Tenancy\Domain\Tenant as DomainTenant;
+use GarAge\Tenancy\Domain\TenantId;
+use GarAge\Tenancy\Domain\TenantSlug;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 
 /**
  * @property int $id
@@ -25,17 +27,6 @@ class Tenant extends Model
     use HasFactory;
 
     /**
-     * Slugs that collide with application routes.
-     *
-     * @var list<string>
-     */
-    public const RESERVED_SLUGS = [
-        'admin', 'api', 'dashboard', 'email', 'forgot-password', 'login', 'logout',
-        'passkeys', 'register', 'reset-password', 'settings', 'storage',
-        'two-factor-challenge', 'up', 'user',
-    ];
-
-    /**
      * Use the slug in generated URLs: route('tenant.dashboard', $tenant).
      */
     public function getRouteKeyName(): string
@@ -44,20 +35,11 @@ class Tenant extends Model
     }
 
     /**
-     * Build a URL-safe slug from the name that is unique and not reserved.
+     * Map this row to the Tenancy domain entity.
      */
-    public static function generateUniqueSlug(string $name): string
+    public function toDomain(): DomainTenant
     {
-        $base = Str::slug($name) ?: 'tenant';
-        $slug = $base;
-        $suffix = 2;
-
-        while (in_array($slug, self::RESERVED_SLUGS, true) || static::where('slug', $slug)->exists()) {
-            $slug = "{$base}-{$suffix}";
-            $suffix++;
-        }
-
-        return $slug;
+        return new DomainTenant(new TenantId($this->id), $this->name, new TenantSlug($this->slug));
     }
 
     /**

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks the commit unless the quality gate passes (scripts/quality-gate.php).
+# Enabled with: git config core.hooksPath .githooks  (composer hooks:install)
+exec php scripts/quality-gate.php

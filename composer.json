@@ -33,13 +33,15 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "GarAge\\": "src/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Tools\\": "tools/"
         }
     },
     "scripts": {
@@ -75,6 +77,13 @@
             "@lint:check",
             "@types:check",
             "@php artisan test"
+        ],
+        "quality": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php scripts/quality-gate.php"
+        ],
+        "hooks:install": [
+            "git config core.hooksPath .githooks"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

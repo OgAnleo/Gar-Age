@@ -2,34 +2,38 @@
 
 namespace App\Http\Controllers\Tenant;
 
-use App\Enums\UnitType;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Tenant\StoreUnitRequest;
-use App\Http\Requests\Tenant\UpdateUnitRequest;
-use App\Models\Unit;
+use App\Http\Presenters\UnitPresenter;
+use App\Http\Requests\Tenant\UnitRequest;
+use App\Tenancy\CurrentTenant;
+use GarAge\Tenancy\Domain\TenantId;
+use GarAge\Units\Application\CreateUnit;
+use GarAge\Units\Application\DeleteUnit;
+use GarAge\Units\Application\GetUnit;
+use GarAge\Units\Application\ListUnits;
+use GarAge\Units\Application\UpdateUnit;
+use GarAge\Units\Domain\UnitId;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * HTTP adapter: translates requests into Units use cases.
+ */
 class UnitController extends Controller
 {
+    public function __construct(
+        private CurrentTenant $currentTenant,
+        private UnitPresenter $presenter,
+    ) {}
+
     /**
      * List the units of the current tenant.
      */
-    public function index(): Response
+    public function index(ListUnits $listUnits): Response
     {
         return Inertia::render('tenant/units/index', [
-            'units' => Unit::query()
-                ->orderBy('code')
-                ->get()
-                ->map(fn (Unit $unit) => [
-                    'id' => $unit->id,
-                    'code' => $unit->code,
-                    'type' => $unit->type->value,
-                    'type_label' => $unit->type->label(),
-                    'size_m2' => $unit->size_m2,
-                    'monthly_price_cents' => $unit->monthly_price_cents,
-                ]),
+            'units' => array_map($this->presenter->listItem(...), $listUnits->handle($this->tenantId())),
         ]);
     }
 
@@ -39,47 +43,59 @@ class UnitController extends Controller
     public function create(): Response
     {
         return Inertia::render('tenant/units/create', [
-            'types' => UnitType::options(),
+            'types' => $this->presenter->typeOptions(),
         ]);
     }
 
     /**
      * Store a new unit for the current tenant.
      */
-    public function store(StoreUnitRequest $request): RedirectResponse
+    public function store(UnitRequest $request, CreateUnit $createUnit): RedirectResponse
     {
-        Unit::create($request->unitData());
+        $createUnit->handle($this->tenantId(), $request->unitInput());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Unidad creada.']);
-
-        return to_route('tenant.units.index');
+        return $this->backToIndex('Unidad creada.');
     }
 
     /**
      * Show the form to edit a unit.
      */
-    public function edit(Unit $unit): Response
+    public function edit(int $unit, GetUnit $getUnit): Response
     {
         return Inertia::render('tenant/units/edit', [
-            'unit' => [
-                'id' => $unit->id,
-                'code' => $unit->code,
-                'type' => $unit->type->value,
-                'size_m2' => $unit->size_m2,
-                'monthly_price' => number_format($unit->monthly_price_cents / 100, 2, '.', ''),
-            ],
-            'types' => UnitType::options(),
+            'unit' => $this->presenter->formValues($getUnit->handle($this->tenantId(), new UnitId($unit))),
+            'types' => $this->presenter->typeOptions(),
         ]);
     }
 
     /**
      * Update a unit of the current tenant.
      */
-    public function update(UpdateUnitRequest $request, Unit $unit): RedirectResponse
+    public function update(UnitRequest $request, int $unit, UpdateUnit $updateUnit): RedirectResponse
     {
-        $unit->update($request->unitData());
+        $updateUnit->handle($this->tenantId(), new UnitId($unit), $request->unitInput());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Unidad actualizada.']);
+        return $this->backToIndex('Unidad actualizada.');
+    }
+
+    /**
+     * Delete a unit of the current tenant.
+     */
+    public function destroy(int $unit, DeleteUnit $deleteUnit): RedirectResponse
+    {
+        $deleteUnit->handle($this->tenantId(), new UnitId($unit));
+
+        return $this->backToIndex('Unidad eliminada.');
+    }
+
+    private function tenantId(): TenantId
+    {
+        return $this->currentTenant->require()->id;
+    }
+
+    private function backToIndex(string $message): RedirectResponse
+    {
+        Inertia::flash('toast', ['type' => 'success', 'message' => $message]);
 
         return to_route('tenant.units.index');
     }

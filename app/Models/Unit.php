@@ -2,9 +2,16 @@
 
 namespace App\Models;
 
-use App\Enums\UnitType;
 use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\UnitFactory;
+use GarAge\Tenancy\Domain\TenantId;
+use GarAge\Units\Domain\Area;
+use GarAge\Units\Domain\Money;
+use GarAge\Units\Domain\Unit as DomainUnit;
+use GarAge\Units\Domain\UnitCode;
+use GarAge\Units\Domain\UnitDetails;
+use GarAge\Units\Domain\UnitId;
+use GarAge\Units\Domain\UnitType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +34,23 @@ class Unit extends Model
 
     /** @use HasFactory<UnitFactory> */
     use HasFactory;
+
+    /**
+     * Map this row to the Units domain entity.
+     */
+    public function toDomain(): DomainUnit
+    {
+        return DomainUnit::restore(
+            new UnitId($this->id),
+            new TenantId($this->tenant_id),
+            new UnitDetails(
+                new UnitCode($this->code),
+                $this->type,
+                Area::fromString($this->size_m2),
+                Money::fromHundredths($this->monthly_price_cents),
+            ),
+        );
+    }
 
     /**
      * @return array<string, string>

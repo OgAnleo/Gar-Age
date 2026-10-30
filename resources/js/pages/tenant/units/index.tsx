@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import { Button } from '@/components/ui/button';
+import DeleteUnit from '@/components/units/delete-unit';
 
 type Unit = {
     id: number;
@@ -62,16 +63,19 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
                                             unit.monthly_price_cents / 100,
                                         )}
                                     </td>
-                                    <td className="py-2 text-right">
-                                        <Link
-                                            href={UnitController.edit({
-                                                tenant: tenant?.slug,
-                                                unit: unit.id,
-                                            })}
-                                            className="text-sm underline underline-offset-4"
-                                        >
-                                            Editar
-                                        </Link>
+                                    <td className="py-2">
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Link
+                                                href={UnitController.edit({
+                                                    tenant: tenant?.slug,
+                                                    unit: unit.id,
+                                                })}
+                                                className="text-sm underline underline-offset-4"
+                                            >
+                                                Editar
+                                            </Link>
+                                            <DeleteUnit unit={unit} />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

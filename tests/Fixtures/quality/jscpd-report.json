@@ -1,0 +1,13 @@
+{
+    "statistics": {
+        "total": {
+            "percentage": 2.5
+        }
+    },
+    "duplicates": [
+        {
+            "firstFile": { "name": "a.php", "start": 1, "end": 10 },
+            "secondFile": { "name": "b.php", "start": 5, "end": 14 }
+        }
+    ]
+}
