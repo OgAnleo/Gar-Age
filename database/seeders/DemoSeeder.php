@@ -15,6 +15,7 @@ use GarAge\Customers\Application\CreateCustomer;
 use GarAge\Customers\Application\CustomerInput;
 use GarAge\Pricing\Application\UpdatePricingConditions;
 use GarAge\Shared\Domain\UserId;
+use GarAge\Tenancy\Application\AddStaffMember;
 use GarAge\Tenancy\Application\DeleteBusiness;
 use GarAge\Tenancy\Application\ListOwnedBusinesses;
 use GarAge\Tenancy\Application\RegisterBusiness;
@@ -29,7 +30,8 @@ use Illuminate\Support\Str;
  * contracts of every booking mode, and paid, pending and overdue fees.
  * Everything goes through the use cases, so prices and fees follow the
  * business rules. Running it again rebuilds the demo business from scratch
- * and restores the demo account (the public demo runs it every night).
+ * and restores the demo owner and employee accounts (the public demo runs it
+ * every night).
  */
 class DemoSeeder extends Seeder
 {
@@ -78,9 +80,11 @@ class DemoSeeder extends Seeder
         ListFees $listFees,
         MarkFeePaid $markFeePaid,
         UpdatePublicPage $updatePublicPage,
+        AddStaffMember $addStaffMember,
     ): void {
-        $user = $this->demoUser();
+        $user = $this->demoUser(config('demo.email'), 'Demo');
         $userId = new UserId($user->id);
+        $this->demoUser(config('demo.staff_email'), 'Empleado Demo');
 
         foreach ($listOwnedBusinesses->handle($userId) as $previous) {
             $deleteBusiness->handle($previous->id, $userId);
@@ -89,6 +93,7 @@ class DemoSeeder extends Seeder
         $tenantId = $registerBusiness->handle('Trasteros Demo', $userId)->id;
         $updatePricing->handle($tenantId, weekly: 5, monthly: 15, annual: 25);
         $updatePublicPage->handle($tenantId, true, '910000000', 'hola@trasteros-demo.example');
+        $addStaffMember->handle($tenantId, $userId, 'Empleado Demo', config('demo.staff_email'));
 
         /** @var array<string, int> $units code => id */
         $units = [];
@@ -133,13 +138,13 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * The demo account with its published credentials, no second factor and no passkeys.
+     * A demo account with the published credentials, no second factor and no passkeys.
      */
-    private function demoUser(): User
+    private function demoUser(string $email, string $name): User
     {
-        $user = User::firstOrNew(['email' => config('demo.email')]);
+        $user = User::firstOrNew(['email' => $email]);
         $user->forceFill([
-            'name' => 'Demo',
+            'name' => $name,
             'password' => config('demo.password'),
             'email_verified_at' => $user->email_verified_at ?? now(),
             'two_factor_secret' => null,

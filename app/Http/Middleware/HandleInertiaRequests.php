@@ -51,12 +51,13 @@ class HandleInertiaRequests extends Middleware
     /**
      * The published demo credentials, only on the public demo.
      *
-     * @return array{email: string, password: string, isDemoUser: bool}|null
+     * @return array{email: string, staffEmail: string, password: string, isDemoUser: bool}|null
      */
     private function demoProps(Request $request): ?array
     {
         return config('demo.enabled') !== true ? null : [
             'email' => (string) config('demo.email'),
+            'staffEmail' => (string) config('demo.staff_email'),
             'password' => (string) config('demo.password'),
             'isDemoUser' => ProtectDemoAccount::isDemoUser($request),
         ];

@@ -31,6 +31,8 @@ it('keeps the demo account from changing its credentials or deleting its busines
     'password' => ['PUT', '/settings/password', ['current_password' => 'password', 'password' => 'n3w-Passw0rd!', 'password_confirmation' => 'n3w-Passw0rd!']],
     'two factor' => ['POST', '/user/two-factor-authentication', []],
     'business' => ['DELETE', '/{tenant}/business', []],
+    'team' => ['POST', '/{tenant}/team', ['name' => 'Pepa', 'email' => 'pepa@example.com']],
+    'new business' => ['POST', '/businesses', ['business_name' => 'Otro']],
 ]);
 
 it('answers 403 to JSON requests such as passkey registration', function () {
@@ -57,7 +59,7 @@ it('leaves other accounts alone, and the demo account when demo mode is off', fu
 
 it('shares the demo credentials, and whether the visitor is the demo account', function () {
     $this->get('/login')->assertInertia(fn (Assert $page) => $page
-        ->where('demo', ['email' => config('demo.email'), 'password' => 'password', 'isDemoUser' => false])
+        ->where('demo', ['email' => config('demo.email'), 'staffEmail' => config('demo.staff_email'), 'password' => 'password', 'isDemoUser' => false])
     );
 
     config(['demo.enabled' => false]);
@@ -85,4 +87,21 @@ it('has no reset outside the demo', function () {
     config(['demo.enabled' => false]);
 
     $this->withToken('secret-token')->postJson('/cron/demo')->assertNotFound();
+});
+
+it('protects the demo employee too, who sees the app as staff', function () {
+    $staff = User::where('email', config('demo.staff_email'))->sole();
+
+    $this->actingAs($staff)
+        ->from('/settings/profile')
+        ->patch('/settings/profile', ['name' => 'Hacker', 'email' => 'hacker@example.com'])
+        ->assertInertiaFlash('toast', ['type' => 'error', 'message' => ProtectDemoAccount::MESSAGE]);
+
+    $this->actingAs($staff)->get("/{$this->tenant->slug}/dashboard")
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('tenant.canManage', false)
+            ->where('demo.isDemoUser', true)
+        );
+
+    expect($staff->fresh()->email)->toBe(config('demo.staff_email'));
 });

@@ -9,13 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * On the public demo, whose credentials are published, keeps visitors from
- * locking the demo account or deleting its business: no changes to its
- * profile, password, second factor or passkeys. Everything else is allowed
- * (the demo data is rebuilt every night).
+ * locking the demo accounts (owner and employee) or leaving data the nightly
+ * reset would not clean: no changes to their profile, password, second
+ * factor or passkeys, to the team, nor new or deleted businesses. Everything
+ * else is allowed (the demo data is rebuilt every night).
  */
 class ProtectDemoAccount
 {
-    /** Routes that change the account's credentials or delete what it owns. */
+    /** Routes that change the accounts' credentials, the team or which businesses exist. */
     public const array PROTECTED_ROUTES = [
         'profile.update',
         'profile.destroy',
@@ -27,6 +28,9 @@ class ProtectDemoAccount
         'passkey.store',
         'passkey.destroy',
         'tenant.business.destroy',
+        'tenant.team.store',
+        'tenant.team.destroy',
+        'businesses.store',
     ];
 
     public const string MESSAGE = 'Esta acción está desactivada en la cuenta de demostración.';
@@ -51,6 +55,7 @@ class ProtectDemoAccount
 
     public static function isDemoUser(Request $request): bool
     {
-        return config('demo.enabled') === true && $request->user()?->email === config('demo.email');
+        return config('demo.enabled') === true
+            && in_array($request->user()?->email, [config('demo.email'), config('demo.staff_email')], true);
     }
 }

@@ -22,6 +22,7 @@ it('builds a demo business with paid, pending and overdue fees, again and again'
     $fees = Fee::withoutGlobalScopes()->get();
 
     expect(User::where('email', config('demo.email'))->count())->toBe(1)
+        ->and($tenant->users()->where('email', config('demo.staff_email'))->first()?->pivot?->getAttribute('role'))->toBe('staff')
         ->and(Unit::withoutGlobalScopes()->count())->toBe(12)
         ->and(Customer::withoutGlobalScopes()->count())->toBe(8)
         ->and(Contract::withoutGlobalScopes()->count())->toBe(9)

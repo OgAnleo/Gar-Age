@@ -3,6 +3,7 @@
  */
 export type Demo = {
     email: string;
+    staffEmail: string;
     password: string;
     isDemoUser: boolean;
 };

@@ -71,7 +71,8 @@ php artisan db:seed     # demo business (safe to run again: it rebuilds it)
 composer dev            # development environment (php artisan dev)
 ```
 
-Demo login: `demo@gar-age.test` / `password`.
+Demo logins (password `password`): `demo@gar-age.test` (owner) and `empleado@gar-age.test`
+(employee).
 
 ## Quality
 
@@ -95,10 +96,10 @@ Current figures: ~99 % line coverage, < 1 % duplication, highest CRAP 5.
   and it never issues duplicates.
 - **Hosts without cron**: `POST /cron/fees` with `Authorization: Bearer <CRON_TOKEN>` does the
   same as `fees:generate` for today. The endpoint only exists when `CRON_TOKEN` is set.
-- **Public demo** (`DEMO_MODE=true`): the login page shows the demo credentials; the demo account
-  cannot change its profile, password, second factor or passkeys, nor delete its business; and
-  `POST /cron/demo` (same token) rebuilds the demo business and account. The scheduler workflow
-  calls it every night before issuing fees.
+- **Public demo** (`DEMO_MODE=true`): the login page shows the credentials of a demo owner and a
+  demo employee; neither can change their profile, password, second factor or passkeys, the team,
+  or create or delete businesses; and `POST /cron/demo` (same token) rebuilds the demo business
+  and both accounts. The scheduler workflow calls it every night before issuing fees.
 - Production defaults (`AppServiceProvider`): immutable dates, destructive database commands
   blocked and strict password rules.
 
