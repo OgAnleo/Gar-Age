@@ -46,6 +46,7 @@ arch('repositories and services of the domain are ports')
         'GarAge\Tenancy\Domain\TenantRepository',
         'GarAge\Tenancy\Domain\Slugger',
         'GarAge\Tenancy\Domain\TenantEraser',
+        'GarAge\Tenancy\Domain\UserDirectory',
         'GarAge\Units\Domain\UnitRepository',
         'GarAge\Units\Domain\UnitUsage',
         'GarAge\Customers\Domain\CustomerRepository',

@@ -30,6 +30,13 @@ interface TenantRepository
     public function ownedBy(UserId $userId): array;
 
     /**
+     * @return list<Member> Owners first, then by name.
+     */
+    public function members(TenantId $tenantId): array;
+
+    public function removeMember(TenantId $tenantId, UserId $userId): void;
+
+    /**
      * The first tenant the user joined, if any.
      */
     public function firstOfUser(UserId $userId): ?Tenant;

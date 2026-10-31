@@ -6,6 +6,7 @@ use App\Http\Controllers\Tenant\CustomerController;
 use App\Http\Controllers\Tenant\DashboardController;
 use App\Http\Controllers\Tenant\FeeController;
 use App\Http\Controllers\Tenant\PricingController;
+use App\Http\Controllers\Tenant\TeamController;
 use App\Http\Controllers\Tenant\UnitController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,7 @@ Route::pattern('unit', '[1-9][0-9]*');
 Route::pattern('customer', '[1-9][0-9]*');
 Route::pattern('contract', '[1-9][0-9]*');
 Route::pattern('fee', '[1-9][0-9]*');
+Route::pattern('member', '[1-9][0-9]*');
 
 Route::prefix('{tenant}')->middleware('tenant')->name('tenant.')->group(function () {
     Route::middleware(['auth', 'verified', 'tenant.member'])->group(function () {
@@ -36,10 +38,17 @@ Route::prefix('{tenant}')->middleware('tenant')->name('tenant.')->group(function
             Route::delete('{fee}/payment', 'unpay')->name('unpay');
         });
 
-        Route::get('pricing', [PricingController::class, 'edit'])->name('pricing.edit');
-        Route::put('pricing', [PricingController::class, 'update'])->name('pricing.update');
+        // Owners only (Gate defined in AppServiceProvider).
+        Route::middleware('can:manage-business')->group(function () {
+            Route::get('pricing', [PricingController::class, 'edit'])->name('pricing.edit');
+            Route::put('pricing', [PricingController::class, 'update'])->name('pricing.update');
 
-        Route::get('business', [BusinessController::class, 'edit'])->name('business.edit');
-        Route::delete('business', [BusinessController::class, 'destroy'])->name('business.destroy');
+            Route::get('business', [BusinessController::class, 'edit'])->name('business.edit');
+            Route::delete('business', [BusinessController::class, 'destroy'])->name('business.destroy');
+
+            Route::get('team', [TeamController::class, 'index'])->name('team.index');
+            Route::post('team', [TeamController::class, 'store'])->name('team.store');
+            Route::delete('team/{member}', [TeamController::class, 'destroy'])->name('team.destroy');
+        });
     });
 });

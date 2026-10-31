@@ -21,6 +21,9 @@ Built with Laravel 13 + Inertia + React 19 + TypeScript, following a **hexagonal
   of collections, overdue fees and free units.
 - **Accounts** — registration creates the business; 2FA and passkeys (Laravel Fortify). An owner
   deletes their business (and all its data) before deleting their account.
+- **Team** — owners add employees by email; someone without an account gets one with a temporary
+  password shown once (no mail needed). Staff run units, customers, contracts and fees; pricing,
+  the team and the business settings stay with owners (`manage-business` gate).
 
 ## Architecture
 
@@ -130,9 +133,9 @@ GitHub pauses scheduled workflows after 60 days without repository activity.
 - **No orphan businesses**: an owner cannot delete their account while they own a business.
 - **Dashboard queries** load a business's contracts and fees in memory — fine for a small
   business; range queries would be the next step for large histories.
-- **Roles**: memberships store a role (`owner`/`staff`), but staff permissions are not built yet.
+- **Temporary passwords** are not forced to change on first login; employees change them in
+  their security settings.
 
 ## Roadmap
 
-- Team members and roles (staff, policies).
 - Public page listing free units.

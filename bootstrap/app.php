@@ -12,6 +12,7 @@ use GarAge\Customers\Domain\CustomerTaxIdAlreadyUsed;
 use GarAge\Shared\Domain\InvalidValue;
 use GarAge\Shared\Domain\NotFound;
 use GarAge\Shared\Domain\StillInUse;
+use GarAge\Tenancy\Domain\AlreadyMember;
 use GarAge\Tenancy\Domain\NotTenantOwner;
 use GarAge\Units\Domain\UnitCodeAlreadyUsed;
 use Illuminate\Foundation\Application;
@@ -66,6 +67,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'dates' => 'La unidad ya está reservada en alguna de esas fechas.',
         ]));
         $exceptions->map(InvalidValue::class, fn (InvalidValue $e) => new UnprocessableEntityHttpException($e->getMessage(), $e));
+        $exceptions->map(AlreadyMember::class, fn () => ValidationException::withMessages([
+            'email' => 'Esa persona ya pertenece al negocio.',
+        ]));
         $exceptions->map(NotTenantOwner::class, fn (NotTenantOwner $e) => new AccessDeniedHttpException($e->getMessage(), $e));
 
         // Actions refused by a business rule: stay on the page with an error toast.

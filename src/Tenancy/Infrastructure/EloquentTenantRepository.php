@@ -3,7 +3,9 @@
 namespace GarAge\Tenancy\Infrastructure;
 
 use App\Models\Tenant as TenantModel;
+use App\Models\User;
 use GarAge\Shared\Domain\UserId;
+use GarAge\Tenancy\Domain\Member;
 use GarAge\Tenancy\Domain\Role;
 use GarAge\Tenancy\Domain\Tenant;
 use GarAge\Tenancy\Domain\TenantId;
@@ -57,6 +59,26 @@ final class EloquentTenantRepository implements TenantRepository
             ->get()
             ->map(fn (TenantModel $tenant): Tenant => $tenant->toDomain())
             ->all());
+    }
+
+    public function members(TenantId $tenantId): array
+    {
+        return array_values(TenantModel::findOrFail($tenantId->value)->users()
+            ->orderByRaw('case when tenant_user.role = ? then 0 else 1 end', [Role::Owner->value])
+            ->orderBy('name')
+            ->get(['users.*', 'tenant_user.role as member_role'])
+            ->map(fn (User $user): Member => new Member(
+                new UserId($user->id),
+                $user->name,
+                $user->email,
+                Role::from((string) $user->getAttribute('member_role')),
+            ))
+            ->all());
+    }
+
+    public function removeMember(TenantId $tenantId, UserId $userId): void
+    {
+        TenantModel::findOrFail($tenantId->value)->users()->detach($userId->value);
     }
 
     public function firstOfUser(UserId $userId): ?Tenant

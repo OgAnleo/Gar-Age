@@ -43,7 +43,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'tenant' => fn () => $this->tenantProps(),
+            'tenant' => fn () => $this->tenantProps($request),
             'demo' => fn () => $this->demoProps($request),
         ];
     }
@@ -63,9 +63,11 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{id: int, name: string, slug: string}|null
+     * The current tenant, and whether the user may manage it (owners) or only run it (staff).
+     *
+     * @return array{id: int, name: string, slug: string, canManage: bool}|null
      */
-    private function tenantProps(): ?array
+    private function tenantProps(Request $request): ?array
     {
         $tenant = app(CurrentTenant::class)->get();
 
@@ -73,6 +75,7 @@ class HandleInertiaRequests extends Middleware
             'id' => $tenant->id->value,
             'name' => $tenant->name,
             'slug' => $tenant->slug->value,
+            'canManage' => $request->user()?->can('manage-business') ?? false,
         ];
     }
 }

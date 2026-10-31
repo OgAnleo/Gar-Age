@@ -1,12 +1,20 @@
 <?php
 
 use GarAge\Shared\Domain\UserId;
+use GarAge\Tenancy\Application\AddStaffMember;
 use GarAge\Tenancy\Application\CheckMembership;
 use GarAge\Tenancy\Application\DeleteBusiness;
 use GarAge\Tenancy\Application\FindHomeTenant;
+use GarAge\Tenancy\Application\GetMemberRole;
+use GarAge\Tenancy\Application\ListMembers;
 use GarAge\Tenancy\Application\ListOwnedBusinesses;
 use GarAge\Tenancy\Application\RegisterBusiness;
+use GarAge\Tenancy\Application\RemoveStaffMember;
+use GarAge\Tenancy\Application\RequireOwner;
 use GarAge\Tenancy\Application\ResolveTenant;
+use GarAge\Tenancy\Domain\AlreadyMember;
+use GarAge\Tenancy\Domain\Member;
+use GarAge\Tenancy\Domain\NotStaffMember;
 use GarAge\Tenancy\Domain\NotTenantOwner;
 use GarAge\Tenancy\Domain\Role;
 use GarAge\Tenancy\Domain\Slugger;
@@ -15,6 +23,7 @@ use GarAge\Tenancy\Domain\TenantEraser;
 use GarAge\Tenancy\Domain\TenantId;
 use GarAge\Tenancy\Domain\TenantNotFound;
 use Tests\Doubles\InMemoryTenantRepository;
+use Tests\Doubles\InMemoryUserDirectory;
 
 beforeEach(function () {
     $this->tenants = new InMemoryTenantRepository;
@@ -76,7 +85,7 @@ it('lets only an owner delete a business, with all its data', function () {
             $this->tenants->remove($tenantId);
         }
     };
-    $delete = new DeleteBusiness($tenants, $eraser);
+    $delete = new DeleteBusiness(new RequireOwner($tenants), $eraser);
     $tenant = $this->register->handle('Trasteros Norte', $this->owner);
     $staff = new UserId(8);
     $tenants->addMember($tenant->id, $staff, Role::Staff);
@@ -99,4 +108,36 @@ it('lists the businesses a user owns, not those where they are staff', function 
     expect(array_map(fn (Tenant $tenant): string => $tenant->name, $list->handle($this->owner)))->toBe(['Trasteros Norte', 'Garajes Sur'])
         ->and($list->handle(new UserId(99)))->toBe([])
         ->and($first->id->value)->toBe(1);
+});
+
+it('lets an owner add staff, creating an account with a temporary password when needed', function () {
+    $users = new InMemoryUserDirectory;
+    $add = new AddStaffMember(new RequireOwner($this->tenants), $this->tenants, $users);
+    $tenant = $this->register->handle('Trasteros Norte', $this->owner);
+    $existing = $users->add('ana@example.com');
+
+    expect($add->handle($tenant->id, $this->owner, 'Ana', ' ANA@example.com '))->toBeNull()
+        ->and($add->handle($tenant->id, $this->owner, 'Luis', 'luis@example.com'))->toBe('temporary-luis@example.com')
+        ->and($this->tenants->roleOf($tenant->id, $existing))->toBe(Role::Staff)
+        ->and($this->tenants->roleOf($tenant->id, $users->findByEmail('luis@example.com')))->toBe(Role::Staff)
+        ->and(fn () => $add->handle($tenant->id, $this->owner, 'Ana', 'ana@example.com'))->toThrow(AlreadyMember::class)
+        ->and(fn () => $add->handle($tenant->id, $existing, 'Eva', 'eva@example.com'))->toThrow(NotTenantOwner::class);
+});
+
+it('lists members owners first and lets an owner remove staff only', function () {
+    $tenant = $this->register->handle('Trasteros Norte', $this->owner);
+    $staff = new UserId(3);
+    $this->tenants->addMember($tenant->id, $staff, Role::Staff);
+    $remove = new RemoveStaffMember(new RequireOwner($this->tenants), $this->tenants);
+    $list = new ListMembers($this->tenants);
+    $role = new GetMemberRole($this->tenants);
+
+    expect(array_map(fn (Member $member): string => "{$member->userId->value}:{$member->role->value}", $list->handle($tenant->id)))->toBe(['7:owner', '3:staff'])
+        ->and($role->handle($tenant->id, $staff))->toBe(Role::Staff)
+        ->and(fn () => $remove->handle($tenant->id, $staff, $this->owner))->toThrow(NotTenantOwner::class)
+        ->and(fn () => $remove->handle($tenant->id, $this->owner, $this->owner))->toThrow(NotStaffMember::class);
+
+    $remove->handle($tenant->id, $this->owner, $staff);
+
+    expect($role->handle($tenant->id, $staff))->toBeNull();
 });

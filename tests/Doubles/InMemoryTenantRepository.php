@@ -3,6 +3,7 @@
 namespace Tests\Doubles;
 
 use GarAge\Shared\Domain\UserId;
+use GarAge\Tenancy\Domain\Member;
 use GarAge\Tenancy\Domain\Role;
 use GarAge\Tenancy\Domain\Tenant;
 use GarAge\Tenancy\Domain\TenantId;
@@ -83,5 +84,25 @@ final class InMemoryTenantRepository implements TenantRepository
     public function roleOf(TenantId $tenantId, UserId $userId): ?Role
     {
         return $this->members[$tenantId->value][$userId->value] ?? null;
+    }
+
+    /**
+     * Members get placeholder names and emails ("user 7", "user7@example.test").
+     */
+    public function members(TenantId $tenantId): array
+    {
+        $members = [];
+        foreach ($this->members[$tenantId->value] ?? [] as $userId => $role) {
+            $members[] = new Member(new UserId($userId), "user {$userId}", "user{$userId}@example.test", $role);
+        }
+
+        usort($members, fn (Member $a, Member $b): int => [$a->role !== Role::Owner, $a->userId->value] <=> [$b->role !== Role::Owner, $b->userId->value]);
+
+        return $members;
+    }
+
+    public function removeMember(TenantId $tenantId, UserId $userId): void
+    {
+        unset($this->members[$tenantId->value][$userId->value]);
     }
 }

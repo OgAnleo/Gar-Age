@@ -5,6 +5,7 @@ import {
     LayoutGrid,
     Percent,
     Receipt,
+    UserCog,
     Users,
     Warehouse,
 } from 'lucide-react';
@@ -13,6 +14,7 @@ import ContractController from '@/actions/App/Http/Controllers/Tenant/ContractCo
 import CustomerController from '@/actions/App/Http/Controllers/Tenant/CustomerController';
 import FeeController from '@/actions/App/Http/Controllers/Tenant/FeeController';
 import PricingController from '@/actions/App/Http/Controllers/Tenant/PricingController';
+import TeamController from '@/actions/App/Http/Controllers/Tenant/TeamController';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -41,7 +43,7 @@ function useMainNavItems(): NavItem[] {
         return [{ title: 'Dashboard', href: dashboard(), icon: LayoutGrid }];
     }
 
-    return [
+    const dailyItems: NavItem[] = [
         { title: 'Panel', href: tenantDashboard(), icon: LayoutGrid },
         { title: 'Unidades', href: UnitController.index(), icon: Warehouse },
         { title: 'Clientes', href: CustomerController.index(), icon: Users },
@@ -51,9 +53,16 @@ function useMainNavItems(): NavItem[] {
             icon: FileText,
         },
         { title: 'Cuotas', href: FeeController.index(), icon: Receipt },
+    ];
+
+    // Only owners manage the business.
+    const ownerItems: NavItem[] = [
         { title: 'Precios', href: PricingController.edit(), icon: Percent },
+        { title: 'Equipo', href: TeamController.index(), icon: UserCog },
         { title: 'Negocio', href: BusinessController.edit(), icon: Building2 },
     ];
+
+    return tenant.canManage ? [...dailyItems, ...ownerItems] : dailyItems;
 }
 
 export function AppSidebar() {
