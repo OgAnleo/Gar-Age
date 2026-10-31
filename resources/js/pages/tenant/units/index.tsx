@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import { Button } from '@/components/ui/button';
 import DeleteUnit from '@/components/units/delete-unit';
@@ -18,8 +18,6 @@ const euros = new Intl.NumberFormat('es-ES', {
 });
 
 export default function UnitsIndex({ units }: { units: Unit[] }) {
-    const { tenant } = usePage().props;
-
     return (
         <>
             <Head title="Unidades" />
@@ -27,9 +25,7 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Unidades</h1>
                     <Button asChild>
-                        <Link href={UnitController.create(tenant?.slug)}>
-                            Nueva unidad
-                        </Link>
+                        <Link href={UnitController.create()}>Nueva unidad</Link>
                     </Button>
                 </div>
 
@@ -67,7 +63,6 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
                                         <div className="flex items-center justify-end gap-2">
                                             <Link
                                                 href={UnitController.edit({
-                                                    tenant: tenant?.slug,
                                                     unit: unit.id,
                                                 })}
                                                 className="text-sm underline underline-offset-4"

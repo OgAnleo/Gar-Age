@@ -1,4 +1,4 @@
-import { Form, usePage } from '@inertiajs/react';
+import { Form } from '@inertiajs/react';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,8 +16,6 @@ export default function DeleteUnit({
 }: {
     unit: { id: number; code: string };
 }) {
-    const { tenant } = usePage().props;
-
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -31,12 +29,7 @@ export default function DeleteUnit({
                     Esta acción no se puede deshacer.
                 </DialogDescription>
 
-                <Form
-                    {...UnitController.destroy.form({
-                        tenant: tenant?.slug,
-                        unit: unit.id,
-                    })}
-                >
+                <Form {...UnitController.destroy.form({ unit: unit.id })}>
                     {({ processing }) => (
                         <DialogFooter className="gap-2">
                             <DialogClose asChild>

@@ -62,6 +62,16 @@ it('allows a code already used by another tenant', function () {
     expect($this->tenant->units()->where('code', 'G-01')->exists())->toBeTrue();
 });
 
+it('explains validation errors in Spanish', function () {
+    $this->actingAs($this->member)
+        ->post($this->url, [...$this->payload, 'code' => '', 'size_m2' => '1.234', 'monthly_price' => 'abc'])
+        ->assertSessionHasErrors([
+            'code' => 'El código es obligatorio.',
+            'size_m2' => 'La superficie admite como máximo 2 decimales.',
+            'monthly_price' => 'El precio mensual debe ser un número.',
+        ]);
+});
+
 it('rejects an unknown type', function () {
     $this->actingAs($this->member)
         ->post($this->url, [...$this->payload, 'type' => 'castle'])

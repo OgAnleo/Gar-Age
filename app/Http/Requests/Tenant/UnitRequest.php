@@ -29,6 +29,29 @@ class UnitRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'code.required' => 'El código es obligatorio.',
+            'code.max' => 'El código no puede tener más de :max caracteres.',
+            'type.required' => 'Elige un tipo de unidad.',
+            'type.enum' => 'El tipo de unidad no es válido.',
+            'size_m2.required' => 'La superficie es obligatoria.',
+            'size_m2.numeric' => 'La superficie debe ser un número.',
+            'size_m2.min' => 'La superficie mínima es :min m².',
+            'size_m2.max' => 'La superficie máxima es :max m².',
+            'size_m2.decimal' => 'La superficie admite como máximo 2 decimales.',
+            'monthly_price.required' => 'El precio mensual es obligatorio.',
+            'monthly_price.numeric' => 'El precio mensual debe ser un número.',
+            'monthly_price.min' => 'El precio mensual no puede ser negativo.',
+            'monthly_price.max' => 'El precio mensual máximo es :max €.',
+            'monthly_price.decimal' => 'El precio mensual admite como máximo 2 decimales.',
+        ];
+    }
+
     public function unitInput(): UnitInput
     {
         return new UnitInput(
