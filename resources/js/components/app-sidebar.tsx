@@ -4,6 +4,7 @@ import {
     FileText,
     FolderGit2,
     LayoutGrid,
+    Percent,
     Receipt,
     Users,
     Warehouse,
@@ -11,6 +12,7 @@ import {
 import ContractController from '@/actions/App/Http/Controllers/Tenant/ContractController';
 import CustomerController from '@/actions/App/Http/Controllers/Tenant/CustomerController';
 import FeeController from '@/actions/App/Http/Controllers/Tenant/FeeController';
+import PricingController from '@/actions/App/Http/Controllers/Tenant/PricingController';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -50,6 +52,7 @@ function useMainNavItems(): NavItem[] {
             icon: FileText,
         },
         { title: 'Cuotas', href: FeeController.index(), icon: Receipt },
+        { title: 'Precios', href: PricingController.edit(), icon: Percent },
     ];
 }
 

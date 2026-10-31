@@ -2,35 +2,35 @@
 
 namespace App\Console\Commands;
 
-use GarAge\Billing\Application\GenerateMonthlyFees;
-use GarAge\Billing\Domain\YearMonth;
+use GarAge\Billing\Application\GenerateDueFees;
+use GarAge\Shared\Domain\DateRange;
 use GarAge\Shared\Domain\InvalidValue;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 /**
- * Console adapter: issues the monthly fees of every tenant (scheduled daily in
- * routes/console.php, so contracts created mid-month get their fee too).
+ * Console adapter: issues the fees of every tenant whose billing period has
+ * started (scheduled daily in routes/console.php).
  */
-#[Signature('fees:generate {month? : Month as YYYY-MM (defaults to the current month)}')]
-#[Description('Issue the monthly fee of every running contract')]
+#[Signature('fees:generate {date? : Day as YYYY-MM-DD (defaults to today)}')]
+#[Description('Issue the fee of every billing period started by the day')]
 class GenerateFeesCommand extends Command
 {
-    public function handle(GenerateMonthlyFees $generateMonthlyFees): int
+    public function handle(GenerateDueFees $generateDueFees): int
     {
-        $argument = $this->argument('month');
+        $argument = $this->argument('date');
 
         try {
-            $month = is_string($argument) ? new YearMonth($argument) : YearMonth::containing(now()->toDateTimeImmutable());
+            $day = is_string($argument) ? DateRange::day($argument) : now()->toDateTimeImmutable();
         } catch (InvalidValue) {
-            $this->error('The month must be written as YYYY-MM.');
+            $this->error('The date must be written as YYYY-MM-DD.');
 
             return self::INVALID;
         }
 
-        $issued = $generateMonthlyFees->handle($month);
-        $this->info("{$issued} fee(s) issued for {$month->value}.");
+        $issued = $generateDueFees->handle($day);
+        $this->info("{$issued} fee(s) issued up to {$day->format('Y-m-d')}.");
 
         return self::SUCCESS;
     }

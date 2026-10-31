@@ -23,11 +23,11 @@ use Illuminate\Support\Carbon;
  * @property string $code
  * @property UnitType $type
  * @property string $size_m2
- * @property int $monthly_price_cents
+ * @property int $daily_price_cents
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['code', 'type', 'size_m2', 'monthly_price_cents'])]
+#[Fillable(['code', 'type', 'size_m2', 'daily_price_cents'])]
 class Unit extends Model
 {
     use BelongsToTenant;
@@ -47,7 +47,7 @@ class Unit extends Model
                 new UnitCode($this->code),
                 $this->type,
                 Area::fromString($this->size_m2),
-                Money::fromHundredths($this->monthly_price_cents),
+                Money::fromHundredths($this->daily_price_cents),
             ),
         );
     }

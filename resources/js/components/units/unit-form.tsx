@@ -11,7 +11,7 @@ export type UnitFormValues = {
     code: string;
     type: string;
     size_m2: string;
-    monthly_price: string;
+    daily_price: string;
 };
 
 type Props = {
@@ -59,13 +59,13 @@ export default function UnitForm({
                         required
                     />
                     <TextField
-                        label="Precio mensual (€)"
-                        name="monthly_price"
+                        label="Tarifa diaria (€)"
+                        name="daily_price"
                         type="number"
                         step="0.01"
                         min="0"
-                        defaultValue={defaults?.monthly_price}
-                        error={errors.monthly_price}
+                        defaultValue={defaults?.daily_price}
+                        error={errors.daily_price}
                         required
                     />
 

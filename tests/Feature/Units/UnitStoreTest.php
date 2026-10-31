@@ -16,7 +16,7 @@ beforeEach(function () {
         'code' => 'G-01',
         'type' => 'garage',
         'size_m2' => '12.5',
-        'monthly_price' => '79.99',
+        'daily_price' => '79.99',
     ];
 });
 
@@ -40,7 +40,7 @@ it('creates a unit for the current tenant', function () {
     $unit = Unit::firstWhere('code', 'G-01');
 
     expect($unit->tenant_id)->toBe($this->tenant->id)
-        ->and($unit->monthly_price_cents)->toBe(7999)
+        ->and($unit->daily_price_cents)->toBe(7999)
         ->and($unit->size_m2)->toBe('12.50');
 });
 
@@ -64,11 +64,11 @@ it('allows a code already used by another tenant', function () {
 
 it('explains validation errors in Spanish', function () {
     $this->actingAs($this->member)
-        ->post($this->url, [...$this->payload, 'code' => '', 'size_m2' => '1.234', 'monthly_price' => 'abc'])
+        ->post($this->url, [...$this->payload, 'code' => '', 'size_m2' => '1.234', 'daily_price' => 'abc'])
         ->assertSessionHasErrors([
             'code' => 'El código es obligatorio.',
             'size_m2' => 'La superficie admite como máximo 2 decimales.',
-            'monthly_price' => 'El precio mensual debe ser un número.',
+            'daily_price' => 'La tarifa diaria debe ser un número.',
         ]);
 });
 

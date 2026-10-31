@@ -65,7 +65,7 @@ final class EloquentUnitRepository implements UnitRepository
     }
 
     /**
-     * @return array{code: string, type: string, size_m2: string, monthly_price_cents: int}
+     * @return array{code: string, type: string, size_m2: string, daily_price_cents: int}
      */
     private function attributes(UnitDetails $details): array
     {
@@ -73,7 +73,7 @@ final class EloquentUnitRepository implements UnitRepository
             'code' => $details->code->value,
             'type' => $details->type->value,
             'size_m2' => $details->area->toDecimalString(),
-            'monthly_price_cents' => $details->monthlyPrice->cents(),
+            'daily_price_cents' => $details->dailyPrice->cents(),
         ];
     }
 }

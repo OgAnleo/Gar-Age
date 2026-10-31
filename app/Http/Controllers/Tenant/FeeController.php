@@ -4,12 +4,11 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Presenters\FeePresenter;
 use App\Http\Presenters\TenantLabels;
-use GarAge\Billing\Application\GenerateMonthlyFees;
+use GarAge\Billing\Application\GenerateDueFees;
 use GarAge\Billing\Application\ListFees;
 use GarAge\Billing\Application\MarkFeePaid;
 use GarAge\Billing\Application\MarkFeeUnpaid;
 use GarAge\Billing\Domain\FeeId;
-use GarAge\Billing\Domain\YearMonth;
 use GarAge\Contracts\Application\ListContracts;
 use GarAge\Customers\Application\ListCustomers;
 use GarAge\Units\Application\ListUnits;
@@ -42,20 +41,19 @@ class FeeController extends TenantController
                 $labels,
                 $this->today(),
             ),
-            'current_month' => YearMonth::containing($this->today())->value,
         ]);
     }
 
     /**
-     * Issue this month's fees of the current tenant now, without waiting for the scheduler.
+     * Issue the fees of the current tenant due by today, without waiting for the scheduler.
      */
-    public function generate(GenerateMonthlyFees $generateMonthlyFees): RedirectResponse
+    public function generate(GenerateDueFees $generateDueFees): RedirectResponse
     {
-        $issued = $generateMonthlyFees->handle(YearMonth::containing($this->today()), $this->tenantId());
+        $issued = $generateDueFees->handle($this->today(), $this->tenantId());
 
         return $this->backToIndex($issued === 0
-            ? 'Las cuotas de este mes ya estaban generadas.'
-            : "Cuotas generadas: {$issued}.");
+            ? 'No había cuotas pendientes de emitir.'
+            : "Cuotas emitidas: {$issued}.");
     }
 
     /**

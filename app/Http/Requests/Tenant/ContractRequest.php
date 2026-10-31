@@ -2,19 +2,21 @@
 
 namespace App\Http\Requests\Tenant;
 
-use App\Concerns\MonthlyPriceValidationRules;
 use GarAge\Contracts\Application\ContractInput;
+use GarAge\Contracts\Domain\RecurringSchedule;
+use GarAge\Contracts\Domain\SpecificDaysSchedule;
+use GarAge\Pricing\Domain\BookingMode;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Input adapter for creating and updating contracts: checks the shape of the
- * form data. Business rules (the unit and customer belong to the tenant, no
- * overlapping contracts per unit) live in the domain.
+ * form data. Recurring modes send a start date and an optional number of
+ * periods; the "days" mode sends a list of dates. Business rules (unit and
+ * customer of the tenant, no overlapping bookings, price) live in the domain.
  */
 class ContractRequest extends FormRequest
 {
-    use MonthlyPriceValidationRules;
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,9 +27,11 @@ class ContractRequest extends FormRequest
         return [
             'unit_id' => ['required', 'integer', 'min:1'],
             'customer_id' => ['required', 'integer', 'min:1'],
-            'starts_on' => ['required', 'date_format:Y-m-d'],
-            'ends_on' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:starts_on'],
-            'monthly_price' => $this->monthlyPriceRules(),
+            'mode' => ['required', Rule::enum(BookingMode::class)],
+            'starts_on' => ['exclude_if:mode,days', 'required', 'date_format:Y-m-d'],
+            'periods' => ['exclude_if:mode,days', 'nullable', 'integer', 'min:1', 'max:'.RecurringSchedule::MAX_PERIODS],
+            'days' => ['exclude_unless:mode,days', 'required', 'array', 'max:'.SpecificDaysSchedule::MAX_DAYS],
+            'days.*' => ['exclude_unless:mode,days', 'date_format:Y-m-d', 'distinct'],
         ];
     }
 
@@ -41,11 +45,15 @@ class ContractRequest extends FormRequest
             'unit_id.*' => 'La unidad no es válida.',
             'customer_id.required' => 'Elige un cliente.',
             'customer_id.*' => 'El cliente no es válido.',
+            'mode.required' => 'Elige una modalidad.',
+            'mode.*' => 'La modalidad no es válida.',
             'starts_on.required' => 'La fecha de inicio es obligatoria.',
             'starts_on.date_format' => 'La fecha de inicio no es válida.',
-            'ends_on.date_format' => 'La fecha de fin no es válida.',
-            'ends_on.after_or_equal' => 'La fecha de fin no puede ser anterior a la de inicio.',
-            ...$this->monthlyPriceMessages(),
+            'periods.*' => 'La duración debe ser un número entero entre 1 y '.RecurringSchedule::MAX_PERIODS.'.',
+            'days.required' => 'Añade al menos un día.',
+            'days.max' => 'Se pueden reservar como máximo :max días.',
+            'days.*.date_format' => 'Alguno de los días no es una fecha válida.',
+            'days.*.distinct' => 'Hay días repetidos.',
         ];
     }
 
@@ -54,9 +62,10 @@ class ContractRequest extends FormRequest
         return new ContractInput(
             unitId: $this->integer('unit_id'),
             customerId: $this->integer('customer_id'),
-            startsOn: $this->string('starts_on')->toString(),
-            endsOn: $this->filled('ends_on') ? $this->string('ends_on')->toString() : null,
-            monthlyPrice: $this->string('monthly_price')->toString(),
+            mode: $this->string('mode')->toString(),
+            startsOn: $this->filled('starts_on') ? $this->string('starts_on')->toString() : null,
+            periods: $this->filled('periods') ? $this->integer('periods') : null,
+            days: array_values(array_filter($this->array('days'), is_string(...))),
         );
     }
 }

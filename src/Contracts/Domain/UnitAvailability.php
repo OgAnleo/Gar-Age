@@ -3,9 +3,12 @@
 namespace GarAge\Contracts\Domain;
 
 use GarAge\Tenancy\Domain\TenantId;
+use GarAge\Units\Domain\UnitId;
 
 /**
- * Domain service: a unit cannot have two contracts with overlapping dates.
+ * Domain service: a unit cannot be taken by two contracts on the same day.
+ * The repository narrows the candidates by date span; the schedules decide
+ * the exact overlap (specific days can interleave without clashing).
  */
 final readonly class UnitAvailability
 {
@@ -14,10 +17,12 @@ final readonly class UnitAvailability
     /**
      * @throws UnitAlreadyRented
      */
-    public function ensureFree(TenantId $tenantId, ContractDetails $details, ?ContractId $except = null): void
+    public function ensureFree(TenantId $tenantId, UnitId $unitId, Schedule $schedule, ?ContractId $except = null): void
     {
-        if ($this->contracts->unitBusyDuring($tenantId, $details->unitId, $details->period, $except)) {
-            throw UnitAlreadyRented::during($details->unitId, $details->period);
+        foreach ($this->contracts->ofUnitDuring($tenantId, $unitId, $schedule->span(), $except) as $other) {
+            if ($other->details()->schedule->overlaps($schedule)) {
+                throw UnitAlreadyRented::during($unitId, $schedule->span());
+            }
         }
     }
 }

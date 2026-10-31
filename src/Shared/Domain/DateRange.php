@@ -21,13 +21,23 @@ final readonly class DateRange
      */
     public static function fromStrings(string $start, ?string $end = null): self
     {
-        $range = new self(self::parse($start), $end === null ? null : self::parse($end));
+        $range = new self(self::day($start), $end === null ? null : self::day($end));
 
         if ($range->end !== null && $range->end < $range->start) {
             throw new InvalidValue('The end date cannot be before the start date.');
         }
 
         return $range;
+    }
+
+    /**
+     * Build a range from dates already parsed (their time of day is ignored).
+     *
+     * @throws InvalidValue
+     */
+    public static function of(DateTimeImmutable $start, ?DateTimeImmutable $end = null): self
+    {
+        return self::fromStrings($start->format('Y-m-d'), $end?->format('Y-m-d'));
     }
 
     public function overlaps(self $other): bool
@@ -38,7 +48,7 @@ final readonly class DateRange
 
     public function contains(DateTimeImmutable $day): bool
     {
-        $day = self::parse($day->format('Y-m-d'));
+        $day = self::day($day->format('Y-m-d'));
 
         return $this->start <= $day && ($this->end === null || $day <= $this->end);
     }
@@ -53,7 +63,12 @@ final readonly class DateRange
         return $this->end?->format('Y-m-d');
     }
 
-    private static function parse(string $date): DateTimeImmutable
+    /**
+     * Parse a "Y-m-d" date at midnight, rejecting impossible days (2026-02-30).
+     *
+     * @throws InvalidValue
+     */
+    public static function day(string $date): DateTimeImmutable
     {
         $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
 

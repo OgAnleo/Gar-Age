@@ -2,13 +2,14 @@
 
 namespace GarAge\Contracts\Domain;
 
+use DateTimeImmutable;
 use GarAge\Customers\Domain\CustomerId;
 use GarAge\Shared\Domain\DateRange;
 use GarAge\Tenancy\Domain\TenantId;
 use GarAge\Units\Domain\UnitId;
 
 /**
- * Port: persistence of contracts. Every read is scoped to one tenant.
+ * Port: persistence of contracts. Reads for the UI are scoped to one tenant.
  */
 interface ContractRepository
 {
@@ -26,17 +27,20 @@ interface ContractRepository
     public function allOfTenant(TenantId $tenantId): array;
 
     /**
-     * Whether another contract of the unit overlaps the period.
-     */
-    public function unitBusyDuring(TenantId $tenantId, UnitId $unitId, DateRange $period, ?ContractId $except = null): bool;
-
-    /**
-     * Contracts running at some point of the period, of every tenant unless
-     * one is given (used by scheduled jobs such as fee generation).
+     * Other contracts of the unit whose span overlaps the period (candidates
+     * for a clash; their schedules decide whether they really overlap).
      *
      * @return list<Contract>
      */
-    public function overlapping(DateRange $period, ?TenantId $tenantId = null): array;
+    public function ofUnitDuring(TenantId $tenantId, UnitId $unitId, DateRange $period, ?ContractId $except = null): array;
+
+    /**
+     * Contracts that have started by the day, of every tenant unless one is
+     * given (used by scheduled jobs such as fee generation).
+     *
+     * @return list<Contract>
+     */
+    public function startedBy(DateTimeImmutable $day, ?TenantId $tenantId = null): array;
 
     public function existsForUnit(TenantId $tenantId, UnitId $unitId): bool;
 

@@ -13,6 +13,6 @@ final readonly class UnitDetails
         public UnitCode $code,
         public UnitType $type,
         public Area $area,
-        public Money $monthlyPrice,
+        public Money $dailyPrice,
     ) {}
 }

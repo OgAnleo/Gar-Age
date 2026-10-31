@@ -9,14 +9,14 @@ use GarAge\Contracts\Domain\ContractDetails;
 
 /**
  * Output adapter: turns domain fees into the props the React pages expect,
- * showing the unit and customer of each fee's contract.
+ * showing the unit, customer and booking mode of each fee's contract.
  */
 final class FeePresenter
 {
     /**
      * @param  list<Fee>  $fees
      * @param  list<Contract>  $contracts
-     * @return list<array{id: int, month: string, unit_code: string, customer_name: string, amount_cents: int, paid_on: string|null, status: string, status_label: string}>
+     * @return list<array{id: int, period_start: string, period_end: string, due_on: string, unit_code: string, customer_name: string, mode_label: string, amount_cents: int, paid_on: string|null, status: string, status_label: string}>
      */
     public function listItems(array $fees, array $contracts, TenantLabels $labels, DateTimeImmutable $today): array
     {
@@ -32,9 +32,12 @@ final class FeePresenter
 
             return [
                 'id' => $fee->id()->value,
-                'month' => $fee->month->value,
+                'period_start' => $fee->period->startString(),
+                'period_end' => (string) $fee->period->endString(),
+                'due_on' => $fee->dueOn()->format('Y-m-d'),
                 'unit_code' => $contract === null ? '?' : $labels->unitCode($contract->unitId),
                 'customer_name' => $contract === null ? '?' : $labels->customerName($contract->customerId),
+                'mode_label' => $contract?->schedule->mode()->label() ?? '?',
                 'amount_cents' => $fee->amount->cents(),
                 'paid_on' => $fee->paidOn()?->format('Y-m-d'),
                 'status' => $status->value,

@@ -17,7 +17,7 @@ use Tests\Doubles\InMemoryUnitRepository;
 
 function unitInput(string $code = 'G-01', string $price = '79.99'): UnitInput
 {
-    return new UnitInput(code: $code, type: 'garage', sizeM2: '12.5', monthlyPrice: $price);
+    return new UnitInput(code: $code, type: 'garage', sizeM2: '12.5', dailyPrice: $price);
 }
 
 beforeEach(function () {
@@ -65,7 +65,7 @@ it('updates a unit keeping its own code but not taking another one', function ()
 
     $this->update->handle($this->tenantA, $id, unitInput('G-01', '50.5'));
 
-    expect($this->get->handle($this->tenantA, $id)->details()->monthlyPrice->cents())->toBe(5050)
+    expect($this->get->handle($this->tenantA, $id)->details()->dailyPrice->cents())->toBe(5050)
         ->and(fn () => $this->update->handle($this->tenantA, $id, unitInput('G-02')))->toThrow(UnitCodeAlreadyUsed::class);
 });
 

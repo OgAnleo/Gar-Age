@@ -4,21 +4,25 @@ namespace GarAge\Billing\Domain;
 
 use DateTimeImmutable;
 use GarAge\Contracts\Domain\ContractId;
+use GarAge\Shared\Domain\DateRange;
 use GarAge\Shared\Domain\Money;
 use GarAge\Tenancy\Domain\TenantId;
 use LogicException;
 
 /**
- * What a contract owes for one month, and whether it has been paid.
- * A fee becomes overdue once its month is over without being paid.
+ * What a contract owes for one billing period (a week, a month, a year, or a
+ * booking of specific days), and whether it has been paid. It is due when its
+ * period starts and becomes overdue after a grace period without payment.
  */
 final class Fee
 {
+    public const int GRACE_DAYS = 7;
+
     private function __construct(
         private readonly ?FeeId $id,
         public readonly TenantId $tenantId,
         public readonly ContractId $contractId,
-        public readonly YearMonth $month,
+        public readonly DateRange $period,
         public readonly Money $amount,
         private ?DateTimeImmutable $paidOn,
     ) {}
@@ -26,9 +30,9 @@ final class Fee
     /**
      * A new unpaid fee, not persisted yet (the repository assigns its id).
      */
-    public static function issue(TenantId $tenantId, ContractId $contractId, YearMonth $month, Money $amount): self
+    public static function issue(TenantId $tenantId, ContractId $contractId, DateRange $period, Money $amount): self
     {
-        return new self(null, $tenantId, $contractId, $month, $amount, null);
+        return new self(null, $tenantId, $contractId, $period, $amount, null);
     }
 
     /**
@@ -38,11 +42,11 @@ final class Fee
         FeeId $id,
         TenantId $tenantId,
         ContractId $contractId,
-        YearMonth $month,
+        DateRange $period,
         Money $amount,
         ?DateTimeImmutable $paidOn,
     ): self {
-        return new self($id, $tenantId, $contractId, $month, $amount, $paidOn);
+        return new self($id, $tenantId, $contractId, $period, $amount, $paidOn);
     }
 
     public function id(): FeeId
@@ -53,6 +57,14 @@ final class Fee
     public function paidOn(): ?DateTimeImmutable
     {
         return $this->paidOn;
+    }
+
+    /**
+     * Last day to pay before the fee is overdue.
+     */
+    public function dueOn(): DateTimeImmutable
+    {
+        return $this->period->start->modify('+'.self::GRACE_DAYS.' days');
     }
 
     /**
@@ -76,7 +88,7 @@ final class Fee
     {
         return match (true) {
             $this->paidOn !== null => FeeStatus::Paid,
-            $this->month->days()->endString() < $day->format('Y-m-d') => FeeStatus::Overdue,
+            $this->dueOn()->format('Y-m-d') < $day->format('Y-m-d') => FeeStatus::Overdue,
             default => FeeStatus::Pending,
         };
     }

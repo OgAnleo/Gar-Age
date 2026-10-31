@@ -12,14 +12,14 @@ beforeEach(function () {
 
     $this->unit = Unit::factory()->for($this->tenant)->create([
         'code' => 'G-01',
-        'monthly_price_cents' => 7999,
+        'daily_price_cents' => 7999,
     ]);
     $this->url = "/{$this->tenant->slug}/units/{$this->unit->id}";
     $this->payload = [
         'code' => 'G-01',
         'type' => 'storage',
         'size_m2' => '8',
-        'monthly_price' => '50.5',
+        'daily_price' => '50.5',
     ];
 });
 
@@ -30,7 +30,7 @@ it('shows the edit form with the unit data', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('tenant/units/edit')
             ->where('unit.code', 'G-01')
-            ->where('unit.monthly_price', '79.99')
+            ->where('unit.daily_price', '79.99')
             ->has('types')
         );
 });
@@ -44,7 +44,7 @@ it('updates the unit keeping its own code', function () {
     $this->unit->refresh();
 
     expect($this->unit->type->value)->toBe('storage')
-        ->and($this->unit->monthly_price_cents)->toBe(5050);
+        ->and($this->unit->daily_price_cents)->toBe(5050);
 });
 
 it('rejects a code used by another unit of the same tenant', function () {

@@ -8,13 +8,16 @@ use GarAge\Contracts\Domain\UnitAlreadyRented;
 use GarAge\Contracts\Domain\UnitAvailability;
 use GarAge\Customers\Domain\CustomerNotFound;
 use GarAge\Customers\Domain\CustomerRepository;
+use GarAge\Pricing\Domain\PricingConditionsRepository;
+use GarAge\Shared\Domain\InvalidValue;
 use GarAge\Tenancy\Domain\TenantId;
 use GarAge\Units\Domain\UnitNotFound;
 use GarAge\Units\Domain\UnitRepository;
 
 /**
- * Checks shared by creating and updating a contract: the unit and the customer
- * belong to the tenant, and the unit is free during the period.
+ * Shared by creating and updating a contract: checks that the unit and the
+ * customer belong to the tenant and that the unit is free, then prices the
+ * contract with the unit's daily rate and the business's current conditions.
  */
 final readonly class ContractRules
 {
@@ -22,18 +25,27 @@ final readonly class ContractRules
         private UnitRepository $units,
         private CustomerRepository $customers,
         private UnitAvailability $availability,
+        private PricingConditionsRepository $pricing,
     ) {}
 
     /**
+     * @throws InvalidValue
      * @throws UnitNotFound
      * @throws CustomerNotFound
      * @throws UnitAlreadyRented
      */
-    public function check(TenantId $tenantId, ContractDetails $details, ?ContractId $except = null): void
+    public function detailsFor(TenantId $tenantId, ContractInput $input, ?ContractId $except = null): ContractDetails
     {
-        $this->units->find($tenantId, $details->unitId) ?? throw UnitNotFound::withId($details->unitId);
-        $this->customers->find($tenantId, $details->customerId) ?? throw CustomerNotFound::withId($details->customerId);
+        $unitId = $input->unitId();
+        $customerId = $input->customerId();
+        $schedule = $input->schedule();
 
-        $this->availability->ensureFree($tenantId, $details, $except);
+        $unit = $this->units->find($tenantId, $unitId) ?? throw UnitNotFound::withId($unitId);
+        $this->customers->find($tenantId, $customerId) ?? throw CustomerNotFound::withId($customerId);
+        $this->availability->ensureFree($tenantId, $unitId, $schedule, $except);
+
+        $price = $schedule->priceWith($this->pricing->forTenant($tenantId), $unit->details()->dailyPrice);
+
+        return new ContractDetails($unitId, $customerId, $schedule, $price);
     }
 }

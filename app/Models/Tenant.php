@@ -17,6 +17,9 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $name
  * @property string $slug
+ * @property int $weekly_discount_percent
+ * @property int $monthly_discount_percent
+ * @property int $annual_discount_percent
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */

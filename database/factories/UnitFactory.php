@@ -24,7 +24,7 @@ class UnitFactory extends Factory
             'code' => fake()->unique()->bothify('?-##'),
             'type' => fake()->randomElement(UnitType::cases()),
             'size_m2' => fake()->randomFloat(2, 2, 30),
-            'monthly_price_cents' => fake()->numberBetween(2500, 15000),
+            'daily_price_cents' => fake()->numberBetween(100, 600),
         ];
     }
 }

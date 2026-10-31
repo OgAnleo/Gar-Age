@@ -3,6 +3,7 @@
 use App\Http\Controllers\Tenant\ContractController;
 use App\Http\Controllers\Tenant\CustomerController;
 use App\Http\Controllers\Tenant\FeeController;
+use App\Http\Controllers\Tenant\PricingController;
 use App\Http\Controllers\Tenant\UnitController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,5 +33,8 @@ Route::prefix('{tenant}')->middleware('tenant')->name('tenant.')->group(function
             Route::post('{fee}/payment', 'pay')->name('pay');
             Route::delete('{fee}/payment', 'unpay')->name('unpay');
         });
+
+        Route::get('pricing', [PricingController::class, 'edit'])->name('pricing.edit');
+        Route::put('pricing', [PricingController::class, 'update'])->name('pricing.update');
     });
 });

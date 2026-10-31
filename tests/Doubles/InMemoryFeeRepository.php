@@ -2,10 +2,10 @@
 
 namespace Tests\Doubles;
 
+use DateTimeImmutable;
 use GarAge\Billing\Domain\Fee;
 use GarAge\Billing\Domain\FeeId;
 use GarAge\Billing\Domain\FeeRepository;
-use GarAge\Billing\Domain\YearMonth;
 use GarAge\Contracts\Domain\ContractId;
 use GarAge\Tenancy\Domain\TenantId;
 
@@ -22,7 +22,7 @@ final class InMemoryFeeRepository implements FeeRepository
     public function add(Fee $fee): FeeId
     {
         $id = new FeeId($this->nextId++);
-        $this->fees[$id->value] = Fee::restore($id, $fee->tenantId, $fee->contractId, $fee->month, $fee->amount, $fee->paidOn());
+        $this->fees[$id->value] = Fee::restore($id, $fee->tenantId, $fee->contractId, $fee->period, $fee->amount, $fee->paidOn());
 
         return $id;
     }
@@ -43,14 +43,15 @@ final class InMemoryFeeRepository implements FeeRepository
     {
         $fees = array_values(array_filter($this->fees, fn (Fee $fee): bool => $fee->tenantId->equals($tenantId)));
 
-        usort($fees, fn (Fee $a, Fee $b): int => strcmp($b->month->value, $a->month->value));
+        usort($fees, fn (Fee $a, Fee $b): int => $b->period->start <=> $a->period->start);
 
         return $fees;
     }
 
-    public function existsFor(ContractId $contractId, YearMonth $month): bool
+    public function existsFor(ContractId $contractId, DateTimeImmutable $periodStart): bool
     {
-        return array_any($this->fees, fn (Fee $fee): bool => $fee->contractId->equals($contractId) && $fee->month->equals($month));
+        return array_any($this->fees, fn (Fee $fee): bool => $fee->contractId->equals($contractId)
+            && $fee->period->startString() === $periodStart->format('Y-m-d'));
     }
 
     public function existsForContract(TenantId $tenantId, ContractId $contractId): bool

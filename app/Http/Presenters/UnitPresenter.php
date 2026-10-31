@@ -11,27 +11,27 @@ use GarAge\Units\Domain\UnitType;
 final class UnitPresenter
 {
     /**
-     * @return array{id: int, code: string, type: string, size_m2: string, type_label: string, monthly_price_cents: int}
+     * @return array{id: int, code: string, type: string, size_m2: string, type_label: string, daily_price_cents: int}
      */
     public function listItem(Unit $unit): array
     {
         return [
             ...$this->commonFields($unit),
             'type_label' => $unit->details()->type->label(),
-            'monthly_price_cents' => $unit->details()->monthlyPrice->cents(),
+            'daily_price_cents' => $unit->details()->dailyPrice->cents(),
         ];
     }
 
     /**
      * Values for the edit form (prices in euros, as typed by the user).
      *
-     * @return array{id: int, code: string, type: string, size_m2: string, monthly_price: string}
+     * @return array{id: int, code: string, type: string, size_m2: string, daily_price: string}
      */
     public function formValues(Unit $unit): array
     {
         return [
             ...$this->commonFields($unit),
-            'monthly_price' => $unit->details()->monthlyPrice->toDecimalString(),
+            'daily_price' => $unit->details()->dailyPrice->toDecimalString(),
         ];
     }
 

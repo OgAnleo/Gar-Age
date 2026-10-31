@@ -2,6 +2,7 @@
 
 namespace Tests\Doubles;
 
+use DateTimeImmutable;
 use GarAge\Contracts\Domain\Contract;
 use GarAge\Contracts\Domain\ContractId;
 use GarAge\Contracts\Domain\ContractRepository;
@@ -52,32 +53,33 @@ final class InMemoryContractRepository implements ContractRepository
             fn (Contract $contract): bool => $contract->tenantId->equals($tenantId),
         ));
 
-        usort($contracts, fn (Contract $a, Contract $b): int => $b->details()->period->start <=> $a->details()->period->start);
+        usort($contracts, fn (Contract $a, Contract $b): int => $this->start($b) <=> $this->start($a));
 
         return $contracts;
     }
 
-    public function unitBusyDuring(TenantId $tenantId, UnitId $unitId, DateRange $period, ?ContractId $except = null): bool
+    public function ofUnitDuring(TenantId $tenantId, UnitId $unitId, DateRange $period, ?ContractId $except = null): array
     {
-        foreach ($this->allOfTenant($tenantId) as $contract) {
-            $details = $contract->details();
-
-            if ($details->unitId->equals($unitId) && $details->period->overlaps($period)
-                && ($except === null || ! $contract->id()->equals($except))) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_values(array_filter(
+            $this->allOfTenant($tenantId),
+            fn (Contract $contract): bool => $contract->details()->unitId->equals($unitId)
+                && $contract->details()->schedule->span()->overlaps($period)
+                && ($except === null || ! $contract->id()->equals($except)),
+        ));
     }
 
-    public function overlapping(DateRange $period, ?TenantId $tenantId = null): array
+    public function startedBy(DateTimeImmutable $day, ?TenantId $tenantId = null): array
     {
         return array_values(array_filter(
             $this->contracts,
-            fn (Contract $contract): bool => $contract->details()->period->overlaps($period)
+            fn (Contract $contract): bool => $this->start($contract) <= $day
                 && ($tenantId === null || $contract->tenantId->equals($tenantId)),
         ));
+    }
+
+    private function start(Contract $contract): DateTimeImmutable
+    {
+        return $contract->details()->schedule->span()->start;
     }
 
     public function existsForUnit(TenantId $tenantId, UnitId $unitId): bool

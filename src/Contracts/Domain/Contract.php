@@ -50,7 +50,7 @@ final class Contract
 
     public function statusOn(DateTimeImmutable $day): ContractStatus
     {
-        $period = $this->details->period;
+        $period = $this->details->schedule->span();
 
         return match (true) {
             $period->contains($day) => ContractStatus::Active,

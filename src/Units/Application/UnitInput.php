@@ -18,7 +18,7 @@ final readonly class UnitInput
         public string $code,
         public string $type,
         public string $sizeM2,
-        public string $monthlyPrice,
+        public string $dailyPrice,
     ) {}
 
     /**
@@ -30,7 +30,7 @@ final readonly class UnitInput
             new UnitCode($this->code),
             UnitType::tryFrom($this->type) ?? throw new InvalidValue("Unknown unit type \"{$this->type}\"."),
             Area::fromString($this->sizeM2),
-            Money::fromString($this->monthlyPrice),
+            Money::fromString($this->dailyPrice),
         );
     }
 }

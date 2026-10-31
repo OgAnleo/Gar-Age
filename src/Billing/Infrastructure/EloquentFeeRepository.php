@@ -3,10 +3,10 @@
 namespace GarAge\Billing\Infrastructure;
 
 use App\Models\Fee as FeeModel;
+use DateTimeImmutable;
 use GarAge\Billing\Domain\Fee;
 use GarAge\Billing\Domain\FeeId;
 use GarAge\Billing\Domain\FeeRepository;
-use GarAge\Billing\Domain\YearMonth;
 use GarAge\Contracts\Domain\ContractId;
 use GarAge\Shared\Infrastructure\QueriesByTenant;
 use GarAge\Tenancy\Domain\TenantId;
@@ -23,7 +23,8 @@ final class EloquentFeeRepository implements FeeRepository
     {
         $model = new FeeModel([
             'contract_id' => $fee->contractId->value,
-            'month' => $fee->month->value,
+            'period_start' => $fee->period->startString(),
+            'period_end' => $fee->period->endString(),
             'amount_cents' => $fee->amount->cents(),
             'paid_on' => $fee->paidOn()?->format('Y-m-d'),
         ]);
@@ -51,18 +52,18 @@ final class EloquentFeeRepository implements FeeRepository
     public function allOfTenant(TenantId $tenantId): array
     {
         return array_values($this->ofTenant($tenantId)
-            ->orderByDesc('month')
+            ->orderByDesc('period_start')
             ->orderBy('id')
             ->get()
             ->map(fn (FeeModel $model): Fee => $model->toDomain())
             ->all());
     }
 
-    public function existsFor(ContractId $contractId, YearMonth $month): bool
+    public function existsFor(ContractId $contractId, DateTimeImmutable $periodStart): bool
     {
         return $this->allTenants()
             ->where('contract_id', $contractId->value)
-            ->where('month', $month->value)
+            ->where('period_start', $periodStart->format('Y-m-d'))
             ->exists();
     }
 

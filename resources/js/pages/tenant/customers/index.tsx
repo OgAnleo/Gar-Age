@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import CustomerController from '@/actions/App/Http/Controllers/Tenant/CustomerController';
 import ConfirmDelete from '@/components/confirm-delete';
 import type { CustomerFormValues } from '@/components/customers/customer-form';
+import DataTable from '@/components/data-table';
 import ResourceIndex from '@/components/resource-index';
 
 type Customer = CustomerFormValues & { id: number };
@@ -19,7 +20,7 @@ export default function CustomersIndex({
             emptyText="Todavía no hay clientes."
             isEmpty={customers.length === 0}
         >
-            <table className="w-full text-left text-sm">
+            <DataTable>
                 <thead className="border-b text-muted-foreground">
                     <tr>
                         <th className="py-2">Nombre</th>
@@ -59,7 +60,7 @@ export default function CustomersIndex({
                         </tr>
                     ))}
                 </tbody>
-            </table>
+            </DataTable>
         </ResourceIndex>
     );
 }

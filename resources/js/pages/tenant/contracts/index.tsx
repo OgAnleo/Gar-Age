@@ -1,6 +1,11 @@
 import { Link } from '@inertiajs/react';
 import ContractController from '@/actions/App/Http/Controllers/Tenant/ContractController';
 import ConfirmDelete from '@/components/confirm-delete';
+import {
+    type BookingMode,
+    pricePeriodLabel,
+} from '@/components/contracts/booking';
+import DataTable from '@/components/data-table';
 import ResourceIndex from '@/components/resource-index';
 import { Badge } from '@/components/ui/badge';
 import { formatCents, formatDate } from '@/lib/format';
@@ -9,9 +14,12 @@ type Contract = {
     id: number;
     unit_code: string;
     customer_name: string;
+    mode: BookingMode;
+    mode_label: string;
     starts_on: string;
     ends_on: string | null;
-    monthly_price_cents: number;
+    days_count: number | null;
+    price_cents: number;
     status: 'upcoming' | 'active' | 'finished';
     status_label: string;
 };
@@ -21,6 +29,27 @@ const statusVariant = {
     active: 'default',
     finished: 'secondary',
 } as const;
+
+function Dates({ contract }: { contract: Contract }) {
+    const start = formatDate(contract.starts_on);
+
+    if (contract.days_count !== null) {
+        return (
+            <>
+                {contract.days_count} días, del {start} al{' '}
+                {formatDate(contract.ends_on ?? contract.starts_on)}
+            </>
+        );
+    }
+
+    return contract.ends_on ? (
+        <>
+            {start} – {formatDate(contract.ends_on)}
+        </>
+    ) : (
+        <>Desde {start}, indefinido</>
+    );
+}
 
 export default function ContractsIndex({
     contracts,
@@ -35,14 +64,14 @@ export default function ContractsIndex({
             emptyText="Todavía no hay contratos."
             isEmpty={contracts.length === 0}
         >
-            <table className="w-full text-left text-sm">
+            <DataTable>
                 <thead className="border-b text-muted-foreground">
                     <tr>
                         <th className="py-2">Unidad</th>
                         <th className="py-2">Cliente</th>
-                        <th className="py-2">Inicio</th>
-                        <th className="py-2">Fin</th>
-                        <th className="py-2 text-right">Precio/mes</th>
+                        <th className="py-2">Modalidad</th>
+                        <th className="py-2">Fechas</th>
+                        <th className="py-2 pr-6 text-right">Precio</th>
                         <th className="py-2">Estado</th>
                         <th className="py-2" />
                     </tr>
@@ -54,16 +83,13 @@ export default function ContractsIndex({
                                 {contract.unit_code}
                             </td>
                             <td className="py-2">{contract.customer_name}</td>
+                            <td className="py-2">{contract.mode_label}</td>
                             <td className="py-2">
-                                {formatDate(contract.starts_on)}
+                                <Dates contract={contract} />
                             </td>
-                            <td className="py-2">
-                                {contract.ends_on
-                                    ? formatDate(contract.ends_on)
-                                    : 'Indefinido'}
-                            </td>
-                            <td className="py-2 text-right">
-                                {formatCents(contract.monthly_price_cents)}
+                            <td className="py-2 pr-6 text-right whitespace-nowrap">
+                                {formatCents(contract.price_cents)}{' '}
+                                {pricePeriodLabel[contract.mode]}
                             </td>
                             <td className="py-2">
                                 <Badge variant={statusVariant[contract.status]}>
@@ -91,7 +117,7 @@ export default function ContractsIndex({
                         </tr>
                     ))}
                 </tbody>
-            </table>
+            </DataTable>
         </ResourceIndex>
     );
 }

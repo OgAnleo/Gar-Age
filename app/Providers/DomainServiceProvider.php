@@ -13,6 +13,8 @@ use GarAge\Contracts\Infrastructure\EloquentContractRepository;
 use GarAge\Customers\Domain\CustomerRepository;
 use GarAge\Customers\Domain\CustomerUsage;
 use GarAge\Customers\Infrastructure\EloquentCustomerRepository;
+use GarAge\Pricing\Domain\PricingConditionsRepository;
+use GarAge\Pricing\Infrastructure\EloquentPricingConditionsRepository;
 use GarAge\Tenancy\Domain\Slugger;
 use GarAge\Tenancy\Domain\TenantRepository;
 use GarAge\Tenancy\Infrastructure\EloquentTenantRepository;
@@ -40,5 +42,6 @@ class DomainServiceProvider extends ServiceProvider
         ContractRepository::class => EloquentContractRepository::class,
         ContractUsage::class => FeesContractUsage::class,
         FeeRepository::class => EloquentFeeRepository::class,
+        PricingConditionsRepository::class => EloquentPricingConditionsRepository::class,
     ];
 }

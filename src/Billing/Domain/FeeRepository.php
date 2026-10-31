@@ -2,6 +2,7 @@
 
 namespace GarAge\Billing\Domain;
 
+use DateTimeImmutable;
 use GarAge\Contracts\Domain\ContractId;
 use GarAge\Tenancy\Domain\TenantId;
 
@@ -17,14 +18,14 @@ interface FeeRepository
     public function find(TenantId $tenantId, FeeId $feeId): ?Fee;
 
     /**
-     * @return list<Fee> Newest month first.
+     * @return list<Fee> Newest period first.
      */
     public function allOfTenant(TenantId $tenantId): array;
 
     /**
-     * Whether the contract already has its fee for the month (contract ids are global).
+     * Whether the contract already has the fee of the period starting that day (contract ids are global).
      */
-    public function existsFor(ContractId $contractId, YearMonth $month): bool;
+    public function existsFor(ContractId $contractId, DateTimeImmutable $periodStart): bool;
 
     public function existsForContract(TenantId $tenantId, ContractId $contractId): bool;
 }

@@ -20,14 +20,15 @@ beforeEach(function () {
     $this->contract = Contract::factory()->for($this->tenant)->create([
         'unit_id' => Unit::factory()->for($this->tenant)->create(['code' => 'G-07']),
         'customer_id' => Customer::factory()->for($this->tenant)->create(['name' => 'Ana López']),
+        'mode' => 'monthly',
         'starts_on' => '2026-10-01',
-        'monthly_price_cents' => 7999,
+        'price_per_period_cents' => 7999,
     ]);
 });
 
 it('lists the fees of the current tenant with labels and status', function () {
-    Fee::factory()->for($this->tenant)->create(['contract_id' => $this->contract->id, 'month' => '2026-10']);
-    Fee::factory()->for($this->tenant)->create(['contract_id' => $this->contract->id, 'month' => '2026-11', 'paid_on' => '2026-11-02']);
+    Fee::factory()->for($this->tenant)->create(['contract_id' => $this->contract->id, 'period_start' => '2026-10-01', 'period_end' => '2026-10-31']);
+    Fee::factory()->for($this->tenant)->create(['contract_id' => $this->contract->id, 'period_start' => '2026-11-01', 'period_end' => '2026-11-30', 'paid_on' => '2026-11-02']);
     Fee::factory()->create(); // another tenant
 
     $this->actingAs($this->member)
@@ -35,30 +36,32 @@ it('lists the fees of the current tenant with labels and status', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('tenant/fees/index')
-            ->where('current_month', '2026-11')
             ->has('fees', 2)
-            ->where('fees.0.month', '2026-11')
+            ->where('fees.0.period_start', '2026-11-01')
+            ->where('fees.0.period_end', '2026-11-30')
             ->where('fees.0.status', 'paid')
             ->where('fees.1.unit_code', 'G-07')
             ->where('fees.1.customer_name', 'Ana López')
+            ->where('fees.1.mode_label', 'Mensual')
+            ->where('fees.1.due_on', '2026-10-08')
             ->where('fees.1.status_label', 'Vencida')
         );
 });
 
-it('generates this month fees for the current tenant only', function () {
+it('issues the fees due by today for the current tenant only', function () {
     Contract::factory()->create(['starts_on' => '2026-01-01']); // another tenant
 
     $this->actingAs($this->member)
         ->post("{$this->url}/generate")
         ->assertRedirect($this->url)
-        ->assertInertiaFlash('toast', ['type' => 'success', 'message' => 'Cuotas generadas: 1.']);
+        ->assertInertiaFlash('toast', ['type' => 'success', 'message' => 'Cuotas emitidas: 2.']);
 
     $this->actingAs($this->member)
         ->post("{$this->url}/generate")
-        ->assertInertiaFlash('toast', ['type' => 'success', 'message' => 'Las cuotas de este mes ya estaban generadas.']);
+        ->assertInertiaFlash('toast', ['type' => 'success', 'message' => 'No había cuotas pendientes de emitir.']);
 
-    expect(Fee::count())->toBe(1)
-        ->and($this->tenant->fees()->sole()->month)->toBe('2026-11');
+    expect(Fee::count())->toBe(2)
+        ->and($this->tenant->fees()->orderBy('period_start')->pluck('period_start')->all())->toBe(['2026-10-01', '2026-11-01']);
 });
 
 it('marks a fee paid today and undoes it', function () {

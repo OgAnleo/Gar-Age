@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class FeeFactory extends Factory
 {
     /**
-     * Define the model's default state: an unpaid fee of a contract of the same tenant.
+     * Define the model's default state: an unpaid monthly fee of a contract of the same tenant.
      *
      * @return array<string, mixed>
      */
@@ -22,7 +22,8 @@ class FeeFactory extends Factory
         return [
             'tenant_id' => Tenant::factory(),
             'contract_id' => fn (array $attributes) => Contract::factory()->create(['tenant_id' => $attributes['tenant_id']]),
-            'month' => '2026-10',
+            'period_start' => '2026-10-01',
+            'period_end' => '2026-10-31',
             'amount_cents' => fake()->numberBetween(2500, 15000),
             'paid_on' => null,
         ];

@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import ConfirmDelete from '@/components/confirm-delete';
+import DataTable from '@/components/data-table';
 import ResourceIndex from '@/components/resource-index';
 import { formatCents } from '@/lib/format';
 
@@ -10,7 +11,7 @@ type Unit = {
     type: string;
     type_label: string;
     size_m2: string;
-    monthly_price_cents: number;
+    daily_price_cents: number;
 };
 
 export default function UnitsIndex({ units }: { units: Unit[] }) {
@@ -22,13 +23,13 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
             emptyText="Todavía no hay unidades."
             isEmpty={units.length === 0}
         >
-            <table className="w-full text-left text-sm">
+            <DataTable>
                 <thead className="border-b text-muted-foreground">
                     <tr>
                         <th className="py-2">Código</th>
                         <th className="py-2">Tipo</th>
                         <th className="py-2 text-right">m²</th>
-                        <th className="py-2 text-right">Precio/mes</th>
+                        <th className="py-2 text-right">Tarifa/día</th>
                         <th className="py-2" />
                     </tr>
                 </thead>
@@ -39,7 +40,7 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
                             <td className="py-2">{unit.type_label}</td>
                             <td className="py-2 text-right">{unit.size_m2}</td>
                             <td className="py-2 text-right">
-                                {formatCents(unit.monthly_price_cents)}
+                                {formatCents(unit.daily_price_cents)}
                             </td>
                             <td className="py-2">
                                 <div className="flex items-center justify-end gap-2">
@@ -62,7 +63,7 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
                         </tr>
                     ))}
                 </tbody>
-            </table>
+            </DataTable>
         </ResourceIndex>
     );
 }

@@ -56,7 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tax_id' => 'Ya existe un cliente con ese DNI, NIE o CIF.',
         ]));
         $exceptions->map(UnitAlreadyRented::class, fn () => ValidationException::withMessages([
-            'starts_on' => 'La unidad ya tiene un contrato en esas fechas.',
+            'dates' => 'La unidad ya está reservada en alguna de esas fechas.',
         ]));
         $exceptions->map(InvalidValue::class, fn (InvalidValue $e) => new UnprocessableEntityHttpException($e->getMessage(), $e));
 

@@ -13,6 +13,7 @@ use GarAge\Contracts\Application\ListContracts;
 use GarAge\Contracts\Application\UpdateContract;
 use GarAge\Contracts\Domain\ContractId;
 use GarAge\Customers\Application\ListCustomers;
+use GarAge\Pricing\Application\GetPricingConditions;
 use GarAge\Units\Application\ListUnits;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -28,6 +29,7 @@ class ContractController extends TenantController
         private ContractPresenter $presenter,
         private ListUnits $listUnits,
         private ListCustomers $listCustomers,
+        private GetPricingConditions $getPricingConditions,
     ) {
         parent::__construct($currentTenant);
     }
@@ -96,13 +98,17 @@ class ContractController extends TenantController
     }
 
     /**
-     * @return array{units: list<array{id: int, label: string, monthly_price: string}>, customers: list<array{id: int, label: string}>}
+     * @return array{units: list<array{id: int, label: string, prices: array<string, int>}>, customers: list<array{id: int, label: string}>, modes: list<array{value: string, label: string}>}
      */
     private function formOptions(): array
     {
         $tenantId = $this->tenantId();
 
-        return $this->presenter->formOptions($this->listUnits->handle($tenantId), $this->listCustomers->handle($tenantId));
+        return $this->presenter->formOptions(
+            $this->listUnits->handle($tenantId),
+            $this->listCustomers->handle($tenantId),
+            $this->getPricingConditions->handle($tenantId),
+        );
     }
 
     private function backToIndex(string $message): RedirectResponse
