@@ -20,6 +20,13 @@ it('prices each recurring period from the daily rate minus its own discount', fu
     'annual: 365 × 3.33 − 30%' => [BookingMode::Annual, 85082],  // 121545 × 0.7 = 85081.5
 ]);
 
+it('lists the price of a unit in every booking mode', function () {
+    $conditions = new PricingConditions(new DiscountPercent(10), new DiscountPercent(20), new DiscountPercent(30));
+
+    expect(array_map(fn (Money $price): int => $price->cents(), $conditions->priceList(Money::fromString('3.33'))))
+        ->toBe(['annual' => 85082, 'monthly' => 7992, 'weekly' => 2098, 'days' => 333]);
+});
+
 it('charges specific days at the plain daily rate', function () {
     $conditions = new PricingConditions(new DiscountPercent(50), new DiscountPercent(50), new DiscountPercent(50));
 

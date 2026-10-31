@@ -5,6 +5,8 @@ namespace App\Providers;
 use GarAge\Billing\Domain\FeeRepository;
 use GarAge\Billing\Infrastructure\EloquentFeeRepository;
 use GarAge\Billing\Infrastructure\FeesContractUsage;
+use GarAge\Catalog\Domain\PublicPageRepository;
+use GarAge\Catalog\Infrastructure\EloquentPublicPageRepository;
 use GarAge\Contracts\Domain\ContractRepository;
 use GarAge\Contracts\Domain\ContractUsage;
 use GarAge\Contracts\Infrastructure\ContractsCustomerUsage;
@@ -49,5 +51,6 @@ class DomainServiceProvider extends ServiceProvider
         ContractUsage::class => FeesContractUsage::class,
         FeeRepository::class => EloquentFeeRepository::class,
         PricingConditionsRepository::class => EloquentPricingConditionsRepository::class,
+        PublicPageRepository::class => EloquentPublicPageRepository::class,
     ];
 }

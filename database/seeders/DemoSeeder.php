@@ -8,6 +8,7 @@ use GarAge\Billing\Application\GenerateDueFees;
 use GarAge\Billing\Application\ListFees;
 use GarAge\Billing\Application\MarkFeePaid;
 use GarAge\Billing\Domain\Fee;
+use GarAge\Catalog\Application\UpdatePublicPage;
 use GarAge\Contracts\Application\ContractInput;
 use GarAge\Contracts\Application\CreateContract;
 use GarAge\Customers\Application\CreateCustomer;
@@ -76,6 +77,7 @@ class DemoSeeder extends Seeder
         GenerateDueFees $generateDueFees,
         ListFees $listFees,
         MarkFeePaid $markFeePaid,
+        UpdatePublicPage $updatePublicPage,
     ): void {
         $user = $this->demoUser();
         $userId = new UserId($user->id);
@@ -86,6 +88,7 @@ class DemoSeeder extends Seeder
 
         $tenantId = $registerBusiness->handle('Trasteros Demo', $userId)->id;
         $updatePricing->handle($tenantId, weekly: 5, monthly: 15, annual: 25);
+        $updatePublicPage->handle($tenantId, true, '910000000', 'hola@trasteros-demo.example');
 
         /** @var array<string, int> $units code => id */
         $units = [];

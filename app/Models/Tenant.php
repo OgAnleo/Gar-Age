@@ -20,6 +20,9 @@ use Illuminate\Support\Carbon;
  * @property int $weekly_discount_percent
  * @property int $monthly_discount_percent
  * @property int $annual_discount_percent
+ * @property bool $public_page_enabled
+ * @property string|null $contact_phone
+ * @property string|null $contact_email
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -28,6 +31,14 @@ class Tenant extends Model
 {
     /** @use HasFactory<TenantFactory> */
     use HasFactory;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return ['public_page_enabled' => 'boolean'];
+    }
 
     /**
      * Use the slug in generated URLs: route('tenant.dashboard', $tenant).

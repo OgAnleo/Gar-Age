@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PublicCatalogController;
 use App\Http\Controllers\Tenant\BusinessController;
 use App\Http\Controllers\Tenant\ContractController;
 use App\Http\Controllers\Tenant\CustomerController;
@@ -25,6 +26,9 @@ Route::pattern('fee', '[1-9][0-9]*');
 Route::pattern('member', '[1-9][0-9]*');
 
 Route::prefix('{tenant}')->middleware('tenant')->name('tenant.')->group(function () {
+    // Public: the business's free units, when it publishes them.
+    Route::get('disponibles', PublicCatalogController::class)->name('catalog');
+
     Route::middleware(['auth', 'verified', 'tenant.member'])->group(function () {
         Route::get('dashboard', DashboardController::class)->name('dashboard');
         Route::resource('units', UnitController::class)->except(['show']);
@@ -45,6 +49,7 @@ Route::prefix('{tenant}')->middleware('tenant')->name('tenant.')->group(function
 
             Route::get('business', [BusinessController::class, 'edit'])->name('business.edit');
             Route::delete('business', [BusinessController::class, 'destroy'])->name('business.destroy');
+            Route::put('business/public-page', [BusinessController::class, 'updatePublicPage'])->name('business.public-page');
 
             Route::get('team', [TeamController::class, 'index'])->name('team.index');
             Route::post('team', [TeamController::class, 'store'])->name('team.store');

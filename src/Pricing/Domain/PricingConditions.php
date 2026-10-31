@@ -44,6 +44,22 @@ final readonly class PricingConditions
     }
 
     /**
+     * What a unit costs in each booking mode: a day for specific days, one
+     * period (with its discount) for the recurring modes.
+     *
+     * @return array<string, Money> Booking mode value => price.
+     */
+    public function priceList(Money $dailyRate): array
+    {
+        $prices = [];
+        foreach (BookingMode::cases() as $mode) {
+            $prices[$mode->value] = $mode->isRecurring() ? $this->periodPrice($dailyRate, $mode) : $dailyRate;
+        }
+
+        return $prices;
+    }
+
+    /**
      * Price of a number of specific days: the plain daily rate, no discount.
      */
     public function daysPrice(Money $dailyRate, int $days): Money

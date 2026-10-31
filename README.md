@@ -24,11 +24,14 @@ Built with Laravel 13 + Inertia + React 19 + TypeScript, following a **hexagonal
 - **Team** — owners add employees by email; someone without an account gets one with a temporary
   password shown once (no mail needed). Staff run units, customers, contracts and fees; pricing,
   the team and the business settings stay with owners (`manage-business` gate).
+- **Public page** — when the owner publishes it, `/{business}/disponibles` shows anyone the units
+  free today with their price per day, week, month and year, and the business's contact details.
 
 ## Architecture
 
 Business code lives in `src/` (namespace `GarAge\`), one module per bounded context:
-`Tenancy`, `Units`, `Customers`, `Contracts`, `Billing`, `Pricing`, `Dashboard`, plus `Shared`.
+`Tenancy`, `Units`, `Customers`, `Contracts`, `Billing`, `Pricing`, `Dashboard`, `Catalog`, plus
+`Shared`.
 
 ```
             ┌──────────────────────────── app/ (Laravel adapters) ──────────────────────────┐
@@ -135,7 +138,3 @@ GitHub pauses scheduled workflows after 60 days without repository activity.
   business; range queries would be the next step for large histories.
 - **Temporary passwords** are not forced to change on first login; employees change them in
   their security settings.
-
-## Roadmap
-
-- Public page listing free units.

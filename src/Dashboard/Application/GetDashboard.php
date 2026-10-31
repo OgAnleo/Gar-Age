@@ -8,6 +8,7 @@ use GarAge\Billing\Domain\FeeRepository;
 use GarAge\Billing\Domain\FeeStatus;
 use GarAge\Contracts\Domain\Contract;
 use GarAge\Contracts\Domain\ContractRepository;
+use GarAge\Contracts\Domain\TakenUnits;
 use GarAge\Dashboard\Domain\FeeTally;
 use GarAge\Dashboard\Domain\Occupancy;
 use GarAge\Shared\Domain\Money;
@@ -59,12 +60,7 @@ final readonly class GetDashboard
      */
     private function freeUnits(array $units, array $contracts, DateTimeImmutable $today): array
     {
-        $taken = [];
-        foreach ($contracts as $contract) {
-            if ($contract->details()->schedule->occupies($today)) {
-                $taken[$contract->details()->unitId->value] = true;
-            }
-        }
+        $taken = TakenUnits::on($contracts, $today);
 
         return array_values(array_filter($units, fn (Unit $unit): bool => ! isset($taken[$unit->id()->value])));
     }
