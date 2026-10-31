@@ -22,7 +22,7 @@ final class InMemoryTenantRepository implements TenantRepository
 
     public function create(string $name, TenantSlug $slug): Tenant
     {
-        $tenant = new Tenant(new TenantId(count($this->tenants) + 1), $name, $slug);
+        $tenant = new Tenant(new TenantId(($this->tenants === [] ? 0 : max(array_keys($this->tenants))) + 1), $name, $slug);
 
         return $this->tenants[$tenant->id->value] = $tenant;
     }
@@ -62,6 +62,22 @@ final class InMemoryTenantRepository implements TenantRepository
         }
 
         return null;
+    }
+
+    public function ownedBy(UserId $userId): array
+    {
+        return array_values(array_filter(
+            $this->tenants,
+            fn (Tenant $tenant): bool => $this->roleOf($tenant->id, $userId) === Role::Owner,
+        ));
+    }
+
+    /**
+     * Forget a tenant and its members (what the TenantEraser double does).
+     */
+    public function remove(TenantId $tenantId): void
+    {
+        unset($this->tenants[$tenantId->value], $this->members[$tenantId->value]);
     }
 
     public function roleOf(TenantId $tenantId, UserId $userId): ?Role

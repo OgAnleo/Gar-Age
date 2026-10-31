@@ -41,6 +41,24 @@ final class EloquentTenantRepository implements TenantRepository
         return $this->ofUser($userId)->whereKey($tenantId->value)->exists();
     }
 
+    public function roleOf(TenantId $tenantId, UserId $userId): ?Role
+    {
+        $role = TenantModel::findOrFail($tenantId->value)->users()->whereKey($userId->value)->first()?->pivot?->getAttribute('role');
+
+        return is_string($role) ? Role::from($role) : null;
+    }
+
+    public function ownedBy(UserId $userId): array
+    {
+        return array_values(TenantModel::whereHas('users', fn (Builder $users) => $users
+            ->whereKey($userId->value)
+            ->where('tenant_user.role', Role::Owner->value))
+            ->orderBy('id')
+            ->get()
+            ->map(fn (TenantModel $tenant): Tenant => $tenant->toDomain())
+            ->all());
+    }
+
     public function firstOfUser(UserId $userId): ?Tenant
     {
         return $this->ofUser($userId)->orderBy('id')->first()?->toDomain();

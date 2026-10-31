@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Tenant\BusinessController;
 use App\Http\Controllers\Tenant\ContractController;
 use App\Http\Controllers\Tenant\CustomerController;
 use App\Http\Controllers\Tenant\DashboardController;
@@ -37,5 +38,8 @@ Route::prefix('{tenant}')->middleware('tenant')->name('tenant.')->group(function
 
         Route::get('pricing', [PricingController::class, 'edit'])->name('pricing.edit');
         Route::put('pricing', [PricingController::class, 'update'])->name('pricing.update');
+
+        Route::get('business', [BusinessController::class, 'edit'])->name('business.edit');
+        Route::delete('business', [BusinessController::class, 'destroy'])->name('business.destroy');
     });
 });

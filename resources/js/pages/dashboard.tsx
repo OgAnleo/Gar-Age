@@ -1,35 +1,42 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Form } from '@inertiajs/react';
+import NewBusinessController from '@/actions/App/Http/Controllers/NewBusinessController';
+import FormPage from '@/components/form-page';
+import TextField from '@/components/text-field';
+import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 
+/**
+ * Landing page of a user without a business (e.g. after deleting theirs).
+ */
 export default function Dashboard() {
     return (
-        <>
-            <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
-            </div>
-        </>
+        <FormPage title="Crea tu negocio">
+            <p className="mb-6 text-sm text-muted-foreground">
+                Todavía no tienes ningún negocio. Créalo para gestionar sus
+                unidades, clientes, contratos y cuotas.
+            </p>
+
+            <Form {...NewBusinessController.form()} className="space-y-6">
+                {({ processing, errors }) => (
+                    <>
+                        <TextField
+                            name="business_name"
+                            label="Nombre del negocio"
+                            error={errors.business_name}
+                            required
+                        />
+                        <Button disabled={processing}>Crear negocio</Button>
+                    </>
+                )}
+            </Form>
+        </FormPage>
     );
 }
 
 Dashboard.layout = {
     breadcrumbs: [
         {
-            title: 'Dashboard',
+            title: 'Inicio',
             href: dashboard(),
         },
     ],

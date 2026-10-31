@@ -2,11 +2,17 @@
 
 use GarAge\Shared\Domain\UserId;
 use GarAge\Tenancy\Application\CheckMembership;
+use GarAge\Tenancy\Application\DeleteBusiness;
 use GarAge\Tenancy\Application\FindHomeTenant;
+use GarAge\Tenancy\Application\ListOwnedBusinesses;
 use GarAge\Tenancy\Application\RegisterBusiness;
 use GarAge\Tenancy\Application\ResolveTenant;
+use GarAge\Tenancy\Domain\NotTenantOwner;
 use GarAge\Tenancy\Domain\Role;
 use GarAge\Tenancy\Domain\Slugger;
+use GarAge\Tenancy\Domain\Tenant;
+use GarAge\Tenancy\Domain\TenantEraser;
+use GarAge\Tenancy\Domain\TenantId;
 use GarAge\Tenancy\Domain\TenantNotFound;
 use Tests\Doubles\InMemoryTenantRepository;
 
@@ -57,4 +63,40 @@ it('knows members and their home tenant', function () {
         ->and((new CheckMembership($this->tenants))->handle($first->id, $stranger))->toBeFalse()
         ->and((new FindHomeTenant($this->tenants))->handle($this->owner)?->slug->value)->toBe('primero')
         ->and((new FindHomeTenant($this->tenants))->handle($stranger))->toBeNull();
+});
+
+it('lets only an owner delete a business, with all its data', function () {
+    $tenants = $this->tenants;
+    $eraser = new class($tenants) implements TenantEraser
+    {
+        public function __construct(private InMemoryTenantRepository $tenants) {}
+
+        public function erase(TenantId $tenantId): void
+        {
+            $this->tenants->remove($tenantId);
+        }
+    };
+    $delete = new DeleteBusiness($tenants, $eraser);
+    $tenant = $this->register->handle('Trasteros Norte', $this->owner);
+    $staff = new UserId(8);
+    $tenants->addMember($tenant->id, $staff, Role::Staff);
+
+    expect(fn () => $delete->handle($tenant->id, $staff))->toThrow(NotTenantOwner::class)
+        ->and(fn () => $delete->handle($tenant->id, new UserId(9)))->toThrow(NotTenantOwner::class);
+
+    $delete->handle($tenant->id, $this->owner);
+
+    expect($tenants->slugExists($tenant->slug))->toBeFalse();
+});
+
+it('lists the businesses a user owns, not those where they are staff', function () {
+    $list = new ListOwnedBusinesses($this->tenants);
+    $first = $this->register->handle('Trasteros Norte', $this->owner);
+    $this->register->handle('Garajes Sur', $this->owner);
+    $other = $this->register->handle('Ajeno', new UserId(8));
+    $this->tenants->addMember($other->id, $this->owner, Role::Staff);
+
+    expect(array_map(fn (Tenant $tenant): string => $tenant->name, $list->handle($this->owner)))->toBe(['Trasteros Norte', 'Garajes Sur'])
+        ->and($list->handle(new UserId(99)))->toBe([])
+        ->and($first->id->value)->toBe(1);
 });

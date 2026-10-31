@@ -18,9 +18,11 @@ type PageProps = {
 export default function Profile({
     mustVerifyEmail,
     status,
+    ownedBusinesses,
 }: {
     mustVerifyEmail: boolean;
     status?: string;
+    ownedBusinesses: { name: string; slug: string }[];
 }) {
     const { auth } = usePage<PageProps>().props;
 
@@ -123,7 +125,7 @@ export default function Profile({
                 </Form>
             </div>
 
-            <DeleteUser />
+            <DeleteUser ownedBusinesses={ownedBusinesses} />
         </>
     );
 }

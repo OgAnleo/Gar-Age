@@ -1,21 +1,20 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    BookOpen,
+    Building2,
     FileText,
-    FolderGit2,
     LayoutGrid,
     Percent,
     Receipt,
     Users,
     Warehouse,
 } from 'lucide-react';
+import BusinessController from '@/actions/App/Http/Controllers/Tenant/BusinessController';
 import ContractController from '@/actions/App/Http/Controllers/Tenant/ContractController';
 import CustomerController from '@/actions/App/Http/Controllers/Tenant/CustomerController';
 import FeeController from '@/actions/App/Http/Controllers/Tenant/FeeController';
 import PricingController from '@/actions/App/Http/Controllers/Tenant/PricingController';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -53,21 +52,9 @@ function useMainNavItems(): NavItem[] {
         },
         { title: 'Cuotas', href: FeeController.index(), icon: Receipt },
         { title: 'Precios', href: PricingController.edit(), icon: Percent },
+        { title: 'Negocio', href: BusinessController.edit(), icon: Building2 },
     ];
 }
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
 
 export function AppSidebar() {
     const mainNavItems = useMainNavItems();
@@ -91,7 +78,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

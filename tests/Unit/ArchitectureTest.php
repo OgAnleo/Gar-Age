@@ -45,6 +45,7 @@ arch('repositories and services of the domain are ports')
     ->expect([
         'GarAge\Tenancy\Domain\TenantRepository',
         'GarAge\Tenancy\Domain\Slugger',
+        'GarAge\Tenancy\Domain\TenantEraser',
         'GarAge\Units\Domain\UnitRepository',
         'GarAge\Units\Domain\UnitUsage',
         'GarAge\Customers\Domain\CustomerRepository',

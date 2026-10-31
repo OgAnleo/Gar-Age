@@ -11,6 +11,7 @@ use GarAge\Customers\Domain\CustomerTaxIdAlreadyUsed;
 use GarAge\Shared\Domain\InvalidValue;
 use GarAge\Shared\Domain\NotFound;
 use GarAge\Shared\Domain\StillInUse;
+use GarAge\Tenancy\Domain\NotTenantOwner;
 use GarAge\Units\Domain\UnitCodeAlreadyUsed;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -59,6 +61,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'dates' => 'La unidad ya está reservada en alguna de esas fechas.',
         ]));
         $exceptions->map(InvalidValue::class, fn (InvalidValue $e) => new UnprocessableEntityHttpException($e->getMessage(), $e));
+        $exceptions->map(NotTenantOwner::class, fn (NotTenantOwner $e) => new AccessDeniedHttpException($e->getMessage(), $e));
 
         // Actions refused by a business rule: stay on the page with an error toast.
         $backWithError = function (string $message) {

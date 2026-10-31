@@ -20,6 +20,16 @@ interface TenantRepository
     public function isMember(TenantId $tenantId, UserId $userId): bool;
 
     /**
+     * The user's role in the tenant, or null when not a member.
+     */
+    public function roleOf(TenantId $tenantId, UserId $userId): ?Role;
+
+    /**
+     * @return list<Tenant> The tenants the user owns, oldest first.
+     */
+    public function ownedBy(UserId $userId): array;
+
+    /**
      * The first tenant the user joined, if any.
      */
     public function firstOfUser(UserId $userId): ?Tenant;

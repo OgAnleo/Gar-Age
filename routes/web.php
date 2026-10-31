@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\NewBusinessController;
 use GarAge\Shared\Domain\UserId;
 use GarAge\Tenancy\Application\FindHomeTenant;
 use Illuminate\Http\Request;
@@ -16,6 +17,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ? to_route('tenant.dashboard', ['tenant' => $tenant->slug->value])
             : Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::post('businesses', NewBusinessController::class)->name('businesses.store');
 });
 
 require __DIR__.'/settings.php';

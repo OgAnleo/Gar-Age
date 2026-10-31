@@ -16,8 +16,32 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 
-export default function DeleteUser() {
+export default function DeleteUser({
+    ownedBusinesses,
+}: {
+    ownedBusinesses: { name: string; slug: string }[];
+}) {
     const passwordInput = useRef<HTMLInputElement>(null);
+
+    if (ownedBusinesses.length > 0) {
+        return (
+            <div className="space-y-6">
+                <Heading
+                    variant="small"
+                    title="Eliminar cuenta"
+                    description="Eres propietario de un negocio"
+                />
+                <p className="text-sm text-muted-foreground">
+                    Antes de eliminar tu cuenta, elimina estos negocios desde su
+                    página Negocio:{' '}
+                    {ownedBusinesses
+                        .map((business) => business.name)
+                        .join(', ')}
+                    .
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

@@ -16,7 +16,9 @@ use GarAge\Customers\Infrastructure\EloquentCustomerRepository;
 use GarAge\Pricing\Domain\PricingConditionsRepository;
 use GarAge\Pricing\Infrastructure\EloquentPricingConditionsRepository;
 use GarAge\Tenancy\Domain\Slugger;
+use GarAge\Tenancy\Domain\TenantEraser;
 use GarAge\Tenancy\Domain\TenantRepository;
+use GarAge\Tenancy\Infrastructure\EloquentTenantEraser;
 use GarAge\Tenancy\Infrastructure\EloquentTenantRepository;
 use GarAge\Tenancy\Infrastructure\StrSlugger;
 use GarAge\Units\Domain\UnitRepository;
@@ -35,6 +37,7 @@ class DomainServiceProvider extends ServiceProvider
     public array $bindings = [
         TenantRepository::class => EloquentTenantRepository::class,
         Slugger::class => StrSlugger::class,
+        TenantEraser::class => EloquentTenantEraser::class,
         UnitRepository::class => EloquentUnitRepository::class,
         UnitUsage::class => ContractsUnitUsage::class,
         CustomerRepository::class => EloquentCustomerRepository::class,
