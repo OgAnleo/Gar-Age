@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Presenters\ContractPresenter;
+use App\Http\Presenters\TenantLabels;
 use App\Http\Requests\Tenant\ContractRequest;
 use App\Tenancy\CurrentTenant;
 use GarAge\Contracts\Application\CreateContract;
@@ -38,13 +39,10 @@ class ContractController extends TenantController
     {
         $tenantId = $this->tenantId();
 
+        $labels = TenantLabels::from($this->listUnits->handle($tenantId), $this->listCustomers->handle($tenantId));
+
         return Inertia::render('tenant/contracts/index', [
-            'contracts' => $this->presenter->listItems(
-                $listContracts->handle($tenantId),
-                $this->listUnits->handle($tenantId),
-                $this->listCustomers->handle($tenantId),
-                now()->toDateTimeImmutable(),
-            ),
+            'contracts' => $this->presenter->listItems($listContracts->handle($tenantId), $labels, $this->today()),
         ]);
     }
 

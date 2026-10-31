@@ -8,6 +8,7 @@ use GarAge\Contracts\Application\GetContract;
 use GarAge\Contracts\Application\ListContracts;
 use GarAge\Contracts\Application\UpdateContract;
 use GarAge\Contracts\Domain\Contract;
+use GarAge\Contracts\Domain\ContractInUse;
 use GarAge\Contracts\Domain\ContractNotFound;
 use GarAge\Contracts\Domain\UnitAlreadyRented;
 use GarAge\Contracts\Domain\UnitAvailability;
@@ -22,6 +23,7 @@ use GarAge\Units\Application\UnitInput;
 use GarAge\Units\Domain\Unit;
 use GarAge\Units\Domain\UnitId;
 use GarAge\Units\Domain\UnitNotFound;
+use Tests\Doubles\FakeUsage;
 use Tests\Doubles\InMemoryContractRepository;
 use Tests\Doubles\InMemoryCustomerRepository;
 use Tests\Doubles\InMemoryUnitRepository;
@@ -51,7 +53,8 @@ beforeEach(function () {
     $this->list = new ListContracts($this->contracts);
     $this->get = $getContract;
     $this->update = new UpdateContract($getContract, $this->contracts, $rules);
-    $this->delete = new DeleteContract($getContract, $this->contracts);
+    $this->usage = new FakeUsage;
+    $this->delete = new DeleteContract($getContract, $this->contracts, $this->usage);
 });
 
 it('creates contracts and lists them newest first', function () {
@@ -101,6 +104,14 @@ it('deletes a contract', function () {
     $this->delete->handle($this->tenantA, $id);
 
     expect($this->list->handle($this->tenantA))->toBe([]);
+});
+
+it('refuses to delete a contract that is still in use', function () {
+    $id = $this->create->handle($this->tenantA, contractInput());
+    $this->usage->inUse = true;
+
+    expect(fn () => $this->delete->handle($this->tenantA, $id))->toThrow(ContractInUse::class)
+        ->and($this->list->handle($this->tenantA))->toHaveCount(1);
 });
 
 it('reports units and customers with contracts as in use', function () {

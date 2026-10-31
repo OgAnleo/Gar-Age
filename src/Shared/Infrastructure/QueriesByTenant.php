@@ -26,7 +26,17 @@ trait QueriesByTenant
      */
     private function ofTenant(TenantId $tenantId): Builder
     {
-        return $this->modelClass()::withoutGlobalScope(TenantScope::class)->where('tenant_id', $tenantId->value);
+        return $this->allTenants()->where('tenant_id', $tenantId->value);
+    }
+
+    /**
+     * Rows of every tenant: only for jobs that work across tenants.
+     *
+     * @return Builder<TModel>
+     */
+    private function allTenants(): Builder
+    {
+        return $this->modelClass()::withoutGlobalScope(TenantScope::class);
     }
 
     /**

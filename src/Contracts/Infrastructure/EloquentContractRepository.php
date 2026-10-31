@@ -58,20 +58,22 @@ final class EloquentContractRepository implements ContractRepository
             ->all());
     }
 
-    /**
-     * Two periods overlap when each one starts before the other ends
-     * (a null end date never ends).
-     */
     public function unitBusyDuring(TenantId $tenantId, UnitId $unitId, DateRange $period, ?ContractId $except = null): bool
     {
-        $query = $this->ofTenant($tenantId)
-            ->where('unit_id', $unitId->value)
-            ->when($period->endString(), fn (Builder $query, string $end) => $query->where('starts_on', '<=', $end))
-            ->where(fn (Builder $query) => $query
-                ->whereNull('ends_on')
-                ->orWhere('ends_on', '>=', $period->startString()));
+        $query = $this->overlappingQuery($this->ofTenant($tenantId), $period)->where('unit_id', $unitId->value);
 
         return $this->existsExcept($query, $except);
+    }
+
+    public function overlapping(DateRange $period, ?TenantId $tenantId = null): array
+    {
+        $query = $tenantId === null ? $this->allTenants() : $this->ofTenant($tenantId);
+
+        return array_values($this->overlappingQuery($query, $period)
+            ->orderBy('id')
+            ->get()
+            ->map(fn (ContractModel $model): Contract => $model->toDomain())
+            ->all());
     }
 
     public function existsForUnit(TenantId $tenantId, UnitId $unitId): bool
@@ -87,6 +89,22 @@ final class EloquentContractRepository implements ContractRepository
     protected function modelClass(): string
     {
         return ContractModel::class;
+    }
+
+    /**
+     * Two periods overlap when each one starts before the other ends
+     * (a null end date never ends).
+     *
+     * @param  Builder<ContractModel>  $query
+     * @return Builder<ContractModel>
+     */
+    private function overlappingQuery(Builder $query, DateRange $period): Builder
+    {
+        return $query
+            ->when($period->endString(), fn (Builder $query, string $end) => $query->where('starts_on', '<=', $end))
+            ->where(fn (Builder $query) => $query
+                ->whereNull('ends_on')
+                ->orWhere('ends_on', '>=', $period->startString()));
     }
 
     /**

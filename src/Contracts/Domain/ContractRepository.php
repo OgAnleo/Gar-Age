@@ -30,6 +30,14 @@ interface ContractRepository
      */
     public function unitBusyDuring(TenantId $tenantId, UnitId $unitId, DateRange $period, ?ContractId $except = null): bool;
 
+    /**
+     * Contracts running at some point of the period, of every tenant unless
+     * one is given (used by scheduled jobs such as fee generation).
+     *
+     * @return list<Contract>
+     */
+    public function overlapping(DateRange $period, ?TenantId $tenantId = null): array;
+
     public function existsForUnit(TenantId $tenantId, UnitId $unitId): bool;
 
     public function existsForCustomer(TenantId $tenantId, CustomerId $customerId): bool;

@@ -4,6 +4,8 @@ use App\Http\Middleware\EnsureTenantMember;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyTenant;
+use GarAge\Billing\Domain\FeeAlreadyPaid;
+use GarAge\Contracts\Domain\ContractInUse;
 use GarAge\Contracts\Domain\UnitAlreadyRented;
 use GarAge\Customers\Domain\CustomerTaxIdAlreadyUsed;
 use GarAge\Shared\Domain\InvalidValue;
@@ -58,10 +60,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]));
         $exceptions->map(InvalidValue::class, fn (InvalidValue $e) => new UnprocessableEntityHttpException($e->getMessage(), $e));
 
-        // Deleting something that other records still use: stay on the page with an error toast.
-        $exceptions->render(function (StillInUse $e) {
-            Inertia::flash('toast', ['type' => 'error', 'message' => 'No se puede eliminar porque tiene contratos.']);
+        // Actions refused by a business rule: stay on the page with an error toast.
+        $backWithError = function (string $message) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $message]);
 
             return back();
-        });
+        };
+        $exceptions->render(fn (StillInUse $e) => $backWithError($e instanceof ContractInUse
+            ? 'No se puede eliminar porque tiene cuotas.'
+            : 'No se puede eliminar porque tiene contratos.'));
+        $exceptions->render(fn (FeeAlreadyPaid $e) => $backWithError('La cuota ya estaba pagada.'));
     })->create();

@@ -71,6 +71,15 @@ final class InMemoryContractRepository implements ContractRepository
         return false;
     }
 
+    public function overlapping(DateRange $period, ?TenantId $tenantId = null): array
+    {
+        return array_values(array_filter(
+            $this->contracts,
+            fn (Contract $contract): bool => $contract->details()->period->overlaps($period)
+                && ($tenantId === null || $contract->tenantId->equals($tenantId)),
+        ));
+    }
+
     public function existsForUnit(TenantId $tenantId, UnitId $unitId): bool
     {
         return array_any($this->allOfTenant($tenantId), fn (Contract $c): bool => $c->details()->unitId->equals($unitId));

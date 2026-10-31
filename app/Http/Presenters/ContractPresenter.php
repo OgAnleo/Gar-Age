@@ -9,29 +9,23 @@ use GarAge\Units\Domain\Unit;
 
 /**
  * Output adapter: turns domain contracts into the props the React pages expect.
- * Units and customers are passed in to show their labels instead of ids.
  */
 final class ContractPresenter
 {
     /**
      * @param  list<Contract>  $contracts
-     * @param  list<Unit>  $units
-     * @param  list<Customer>  $customers
      * @return list<array{id: int, unit_code: string, customer_name: string, starts_on: string, ends_on: string|null, monthly_price_cents: int, status: string, status_label: string}>
      */
-    public function listItems(array $contracts, array $units, array $customers, DateTimeImmutable $today): array
+    public function listItems(array $contracts, TenantLabels $labels, DateTimeImmutable $today): array
     {
-        $unitCodes = array_column(array_map($this->unitOption(...), $units), 'label', 'id');
-        $customerNames = array_column(array_map($this->customerOption(...), $customers), 'label', 'id');
-
-        return array_map(function (Contract $contract) use ($unitCodes, $customerNames, $today): array {
+        return array_map(function (Contract $contract) use ($labels, $today): array {
             $details = $contract->details();
             $status = $contract->statusOn($today);
 
             return [
                 'id' => $contract->id()->value,
-                'unit_code' => $unitCodes[$details->unitId->value] ?? '?',
-                'customer_name' => $customerNames[$details->customerId->value] ?? '?',
+                'unit_code' => $labels->unitCode($details->unitId),
+                'customer_name' => $labels->customerName($details->customerId),
                 'starts_on' => $details->period->startString(),
                 'ends_on' => $details->period->endString(),
                 'monthly_price_cents' => $details->monthlyPrice->cents(),
@@ -70,28 +64,15 @@ final class ContractPresenter
     public function formOptions(array $units, array $customers): array
     {
         return [
-            'units' => array_map($this->unitOption(...), $units),
-            'customers' => array_map($this->customerOption(...), $customers),
+            'units' => array_map(fn (Unit $unit): array => [
+                'id' => $unit->id()->value,
+                'label' => $unit->details()->code->value,
+                'monthly_price' => $unit->details()->monthlyPrice->toDecimalString(),
+            ], $units),
+            'customers' => array_map(fn (Customer $customer): array => [
+                'id' => $customer->id()->value,
+                'label' => $customer->details()->name->value,
+            ], $customers),
         ];
-    }
-
-    /**
-     * @return array{id: int, label: string, monthly_price: string}
-     */
-    private function unitOption(Unit $unit): array
-    {
-        return [
-            'id' => $unit->id()->value,
-            'label' => $unit->details()->code->value,
-            'monthly_price' => $unit->details()->monthlyPrice->toDecimalString(),
-        ];
-    }
-
-    /**
-     * @return array{id: int, label: string}
-     */
-    private function customerOption(Customer $customer): array
-    {
-        return ['id' => $customer->id()->value, 'label' => $customer->details()->name->value];
     }
 }

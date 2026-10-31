@@ -11,12 +11,14 @@ const INFRASTRUCTURE = [
     'GarAge\Units\Infrastructure',
     'GarAge\Customers\Infrastructure',
     'GarAge\Contracts\Infrastructure',
+    'GarAge\Billing\Infrastructure',
 ];
 const APPLICATION = [
     'GarAge\Tenancy\Application',
     'GarAge\Units\Application',
     'GarAge\Customers\Application',
     'GarAge\Contracts\Application',
+    'GarAge\Billing\Application',
 ];
 
 arch('the domain is pure PHP and knows no outer layer')
@@ -26,6 +28,7 @@ arch('the domain is pure PHP and knows no outer layer')
         'GarAge\Units\Domain',
         'GarAge\Customers\Domain',
         'GarAge\Contracts\Domain',
+        'GarAge\Billing\Domain',
     ])
     ->not->toUse([...FRAMEWORK, ...APPLICATION, ...INFRASTRUCTURE]);
 
@@ -42,5 +45,7 @@ arch('repositories and services of the domain are ports')
         'GarAge\Customers\Domain\CustomerRepository',
         'GarAge\Customers\Domain\CustomerUsage',
         'GarAge\Contracts\Domain\ContractRepository',
+        'GarAge\Contracts\Domain\ContractUsage',
+        'GarAge\Billing\Domain\FeeRepository',
     ])
     ->toBeInterfaces();

@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Tenancy\CurrentTenant;
+use DateTimeImmutable;
 use GarAge\Tenancy\Domain\TenantId;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 
 /**
  * Base for controllers of tenant sections: gives them the current tenant id
- * (passed explicitly to every use case) and the "back with a toast" response.
+ * (passed explicitly to every use case), today's date and the
+ * "back with a toast" response.
  */
 abstract class TenantController extends Controller
 {
@@ -19,6 +21,11 @@ abstract class TenantController extends Controller
     protected function tenantId(): TenantId
     {
         return $this->currentTenant->require()->id;
+    }
+
+    protected function today(): DateTimeImmutable
+    {
+        return now()->toDateTimeImmutable();
     }
 
     protected function redirectWithToast(string $route, string $message): RedirectResponse
