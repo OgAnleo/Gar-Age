@@ -97,6 +97,16 @@ it('lets specific days interleave with other bookings without clashing', functio
         ->and($days->overlaps(recurring(BookingMode::Monthly, '2026-11-01')))->toBeFalse();
 });
 
+it('knows whether it takes the unit on a day', function () {
+    $days = SpecificDaysSchedule::fromStrings(['2026-10-05', '2026-10-20']);
+    $weekly = recurring(BookingMode::Weekly, '2026-10-01', 1);
+
+    expect($days->occupies(new DateTimeImmutable('2026-10-20 18:00')))->toBeTrue()
+        ->and($days->occupies(new DateTimeImmutable('2026-10-10')))->toBeFalse()
+        ->and($weekly->occupies(new DateTimeImmutable('2026-10-07')))->toBeTrue()
+        ->and($weekly->occupies(new DateTimeImmutable('2026-10-08')))->toBeFalse();
+});
+
 it('prices each schedule with the business conditions', function () {
     $conditions = new PricingConditions(new DiscountPercent(10), new DiscountPercent(20), new DiscountPercent(30));
     $rate = Money::fromString('2');

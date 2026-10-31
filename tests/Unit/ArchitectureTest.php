@@ -21,6 +21,7 @@ const APPLICATION = [
     'GarAge\Contracts\Application',
     'GarAge\Billing\Application',
     'GarAge\Pricing\Application',
+    'GarAge\Dashboard\Application',
 ];
 
 arch('the domain is pure PHP and knows no outer layer')
@@ -32,6 +33,7 @@ arch('the domain is pure PHP and knows no outer layer')
         'GarAge\Contracts\Domain',
         'GarAge\Billing\Domain',
         'GarAge\Pricing\Domain',
+        'GarAge\Dashboard\Domain',
     ])
     ->not->toUse([...FRAMEWORK, ...APPLICATION, ...INFRASTRUCTURE]);
 

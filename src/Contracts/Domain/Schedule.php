@@ -47,6 +47,14 @@ abstract readonly class Schedule
      */
     abstract public function pricedLike(self $other): bool;
 
+    /**
+     * Whether the unit is taken on the day.
+     */
+    public function occupies(DateTimeImmutable $day): bool
+    {
+        return array_any($this->occupation(), fn (DateRange $range): bool => $range->contains($day));
+    }
+
     public function overlaps(self $other): bool
     {
         if (! $this->span()->overlaps($other->span())) {

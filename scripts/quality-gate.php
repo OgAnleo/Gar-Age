@@ -30,7 +30,8 @@ putenv('XDEBUG_MODE=coverage');
 
 $thresholds = Thresholds::fromFile('quality-gate.json');
 
-runStep('Tests with coverage', escapeshellarg(PHP_BINARY).' vendor/bin/pest --coverage-clover '.REPORT_DIR.'/clover.xml');
+// Writing the clover report needs more than the usual 128M of memory.
+runStep('Tests with coverage', escapeshellarg(PHP_BINARY).' -d memory_limit=512M vendor/bin/pest --coverage-clover '.REPORT_DIR.'/clover.xml');
 runStep('Duplication scan', 'node node_modules/jscpd/run-jscpd.js --config .jscpd.json');
 
 $clover = CloverReport::fromFile(REPORT_DIR.'/clover.xml');

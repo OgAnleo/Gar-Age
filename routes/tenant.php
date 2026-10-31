@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Tenant\ContractController;
 use App\Http\Controllers\Tenant\CustomerController;
+use App\Http\Controllers\Tenant\DashboardController;
 use App\Http\Controllers\Tenant\FeeController;
 use App\Http\Controllers\Tenant\PricingController;
 use App\Http\Controllers\Tenant\UnitController;
@@ -22,7 +23,7 @@ Route::pattern('fee', '[1-9][0-9]*');
 
 Route::prefix('{tenant}')->middleware('tenant')->name('tenant.')->group(function () {
     Route::middleware(['auth', 'verified', 'tenant.member'])->group(function () {
-        Route::inertia('dashboard', 'tenant/dashboard')->name('dashboard');
+        Route::get('dashboard', DashboardController::class)->name('dashboard');
         Route::resource('units', UnitController::class)->except(['show']);
         Route::resource('customers', CustomerController::class)->except(['show']);
         Route::resource('contracts', ContractController::class)->except(['show']);

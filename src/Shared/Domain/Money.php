@@ -14,6 +14,11 @@ final readonly class Money extends TwoDecimalNumber
         return $this->hundredths;
     }
 
+    public function plus(self $other): self
+    {
+        return self::fromHundredths($this->hundredths + $other->hundredths);
+    }
+
     public function times(int $factor): self
     {
         return self::fromHundredths($this->hundredths * $factor);

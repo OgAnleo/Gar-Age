@@ -84,6 +84,20 @@ final class Fee
         $this->paidOn = null;
     }
 
+    /**
+     * Days past the due date on the day (0 when paid or not overdue).
+     */
+    public function daysOverdueOn(DateTimeImmutable $day): int
+    {
+        if ($this->paidOn !== null) {
+            return 0;
+        }
+
+        $daysLate = (int) $this->dueOn()->diff(DateRange::day($day->format('Y-m-d')))->format('%r%a');
+
+        return max(0, $daysLate);
+    }
+
     public function statusOn(DateTimeImmutable $day): FeeStatus
     {
         return match (true) {
