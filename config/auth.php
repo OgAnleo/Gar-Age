@@ -114,4 +114,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Email Verification
+    |--------------------------------------------------------------------------
+    |
+    | When false, new and changed email addresses count as verified at once.
+    | For deployments that cannot send mail, such as the free demo on Render.
+    |
+    */
+
+    'verify_email' => (bool) env('AUTH_VERIFY_EMAIL', true),
+
 ];

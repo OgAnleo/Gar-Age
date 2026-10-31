@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // Shared secret of the external scheduler (POST /cron/fees); empty disables it.
+    'cron' => [
+        'token' => env('CRON_TOKEN'),
+    ],
+
 ];

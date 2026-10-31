@@ -13,7 +13,7 @@ final readonly class TenantSlug
      * Slugs that collide with application routes.
      */
     private const array RESERVED = [
-        'admin', 'api', 'dashboard', 'email', 'forgot-password', 'login', 'logout',
+        'admin', 'api', 'businesses', 'cron', 'dashboard', 'email', 'forgot-password', 'login', 'logout',
         'passkeys', 'register', 'reset-password', 'settings', 'storage',
         'two-factor-challenge', 'up', 'user',
     ];

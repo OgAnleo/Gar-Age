@@ -57,7 +57,7 @@ ids are simply "not found". An Eloquent global scope remains as a safety net.
 
 ## Getting started
 
-Requirements: PHP 8.3+, Composer, Node 22+, SQLite (default) or MySQL/PostgreSQL.
+Requirements: PHP 8.4+, Composer, Node 22+, SQLite (default) or MySQL/PostgreSQL.
 
 ```bash
 composer setup          # install, .env, key, migrate, build
@@ -87,8 +87,36 @@ Current figures: ~99 % line coverage, < 1 % duplication, highest CRAP 5.
   minute (`* * * * * php artisan schedule:run`) or the host's equivalent; if it is missed, the
   command can be run by hand (`php artisan fees:generate [YYYY-MM-DD]`) or from the Fees page,
   and it never issues duplicates.
+- **Hosts without cron**: `POST /cron/fees` with `Authorization: Bearer <CRON_TOKEN>` does the
+  same as `fees:generate` for today. The endpoint only exists when `CRON_TOKEN` is set.
 - Production defaults (`AppServiceProvider`): immutable dates, destructive database commands
   blocked and strict password rules.
+
+## Deploying (free: Render + Neon)
+
+The repository ships a production `Dockerfile` (Apache + PHP 8.5, frontend built in a separate
+stage; migrations run when the container starts), a Render Blueprint (`render.yaml`) and a
+GitHub Actions workflow that plays the scheduler (`.github/workflows/scheduler.yml`). CI also runs
+the test suite on PostgreSQL.
+
+1. **Database** — a free project on [Neon](https://neon.com) (Frankfurt), linked in `neon.ts`.
+   `neon env pull` writes its two connection strings to `.env`: `DATABASE_URL` (pooled, used by
+   the app) and `DATABASE_URL_UNPOOLED` (direct, used by migrations, which need session state).
+   The `pgsql` connection falls back to `DATABASE_URL` when `DB_URL` is not set.
+2. **App** — on [Render](https://render.com), _New → Blueprint_ and pick this repository. Fill in
+   the values it asks for:
+    - `APP_KEY`: the output of `php artisan key:generate --show`;
+    - `APP_URL`: the service URL, e.g. `https://gar-age.onrender.com`;
+    - `DATABASE_URL` and `DATABASE_URL_UNPOOLED`: the two Neon connection strings.
+3. **Demo data** (optional) — with the Neon variables in `.env`:
+   `DB_CONNECTION=pgsql php artisan db:seed --force`.
+4. **Scheduler** — in the GitHub repository, add the secrets `APP_URL` and `CRON_TOKEN` (copy the
+   value Render generated). Run the _scheduler_ workflow once by hand to check it.
+
+Free plan caveats: the app sleeps after 15 minutes without traffic and takes about a minute to
+wake up; Neon's free compute also scales to zero; there is no outgoing mail (`MAIL_MAILER=log`), so email verification is off
+(`AUTH_VERIFY_EMAIL=false`);
+GitHub pauses scheduled workflows after 60 days without repository activity.
 
 ## Known risks and decisions
 

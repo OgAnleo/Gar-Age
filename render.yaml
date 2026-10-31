@@ -1,0 +1,43 @@
+# Render Blueprint: the app on Render's free plan (Docker), with the database
+# on Neon. Values marked `sync: false` are asked for when the Blueprint is
+# created (see "Deploying" in the README).
+services:
+    - type: web
+      name: gar-age
+      runtime: docker
+      plan: free
+      region: frankfurt
+      healthCheckPath: /up
+      envVars:
+          - key: APP_NAME
+            value: Gar-Age
+          - key: APP_ENV
+            value: production
+          - key: APP_DEBUG
+            value: 'false'
+          - key: APP_KEY # php artisan key:generate --show
+            sync: false
+          - key: APP_URL # https://<service>.onrender.com
+            sync: false
+          - key: DB_CONNECTION
+            value: pgsql
+          - key: DATABASE_URL # Neon pooled connection string (-pooler host)
+            sync: false
+          - key: DATABASE_URL_UNPOOLED # Neon direct connection string, for migrations
+            sync: false
+          - key: LOG_CHANNEL
+            value: stderr
+          - key: SESSION_DRIVER
+            value: database
+          - key: SESSION_SECURE_COOKIE
+            value: 'true'
+          - key: CACHE_STORE
+            value: database
+          - key: QUEUE_CONNECTION # no worker on the free plan
+            value: sync
+          - key: MAIL_MAILER # Render's free plan blocks SMTP ports
+            value: log
+          - key: AUTH_VERIFY_EMAIL # no mail, so new accounts count as verified
+            value: 'false'
+          - key: CRON_TOKEN # also a GitHub secret for the scheduler workflow
+            generateValue: true

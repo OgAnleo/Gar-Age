@@ -37,6 +37,10 @@ class CreateNewUser implements CreatesNewUsers
                 'password' => $input['password'],
             ]);
 
+            if (! config('auth.verify_email')) {
+                $user->markEmailAsVerified(); // so no verification mail is sent
+            }
+
             $this->registerBusiness->handle($input['business_name'], new UserId($user->id));
 
             return $user;

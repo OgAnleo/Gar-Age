@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\CronController;
 use App\Http\Controllers\NewBusinessController;
+use App\Http\Middleware\VerifyCronToken;
 use GarAge\Shared\Domain\UserId;
 use GarAge\Tenancy\Application\FindHomeTenant;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,6 +23,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('businesses', NewBusinessController::class)->name('businesses.store');
 });
+
+// Called by the external scheduler (see .github/workflows/scheduler.yml), not by browsers.
+Route::post('cron/fees', [CronController::class, 'fees'])
+    ->middleware(VerifyCronToken::class)
+    ->withoutMiddleware(PreventRequestForgery::class)
+    ->name('cron.fees');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/tenant.php';
