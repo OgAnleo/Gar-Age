@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureTenantMember;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyTenant;
+use App\Http\Middleware\ProtectDemoAccount;
 use GarAge\Billing\Domain\FeeAlreadyPaid;
 use GarAge\Contracts\Domain\ContractInUse;
 use GarAge\Contracts\Domain\UnitAlreadyRented;
@@ -40,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            ProtectDemoAccount::class,
         ]);
 
         $middleware->alias([

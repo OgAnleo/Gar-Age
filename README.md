@@ -89,6 +89,10 @@ Current figures: ~99 % line coverage, < 1 % duplication, highest CRAP 5.
   and it never issues duplicates.
 - **Hosts without cron**: `POST /cron/fees` with `Authorization: Bearer <CRON_TOKEN>` does the
   same as `fees:generate` for today. The endpoint only exists when `CRON_TOKEN` is set.
+- **Public demo** (`DEMO_MODE=true`): the login page shows the demo credentials; the demo account
+  cannot change its profile, password, second factor or passkeys, nor delete its business; and
+  `POST /cron/demo` (same token) rebuilds the demo business and account. The scheduler workflow
+  calls it every night before issuing fees.
 - Production defaults (`AppServiceProvider`): immutable dates, destructive database commands
   blocked and strict password rules.
 

@@ -39,5 +39,7 @@ services:
             value: log
           - key: AUTH_VERIFY_EMAIL # no mail, so new accounts count as verified
             value: 'false'
+          - key: DEMO_MODE # protect the published demo account; nightly reset
+            value: 'true'
           - key: CRON_TOKEN # also a GitHub secret for the scheduler workflow
             generateValue: true

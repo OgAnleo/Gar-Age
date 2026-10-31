@@ -27,12 +27,11 @@ use Illuminate\Support\Str;
  * A demo business full of data relative to today: occupied and free units,
  * contracts of every booking mode, and paid, pending and overdue fees.
  * Everything goes through the use cases, so prices and fees follow the
- * business rules. Running it again rebuilds the demo business from scratch.
+ * business rules. Running it again rebuilds the demo business from scratch
+ * and restores the demo account (the public demo runs it every night).
  */
 class DemoSeeder extends Seeder
 {
-    public const string EMAIL = 'demo@gar-age.test';
-
     private const string TAX_ID_LETTERS = 'TRWAGMYFPDXBNJZSQVHLCKE';
 
     /** code => [type, m², daily rate] */
@@ -78,10 +77,7 @@ class DemoSeeder extends Seeder
         ListFees $listFees,
         MarkFeePaid $markFeePaid,
     ): void {
-        $user = User::firstOrCreate(
-            ['email' => self::EMAIL],
-            ['name' => 'Demo', 'password' => 'password', 'email_verified_at' => now()],
-        );
+        $user = $this->demoUser();
         $userId = new UserId($user->id);
 
         foreach ($listOwnedBusinesses->handle($userId) as $previous) {
@@ -131,6 +127,25 @@ class DemoSeeder extends Seeder
             fn (int $customer): int => $contractIds[$customer], // each customer's first contract
             self::LATE_PAYERS,
         ));
+    }
+
+    /**
+     * The demo account with its published credentials, no second factor and no passkeys.
+     */
+    private function demoUser(): User
+    {
+        $user = User::firstOrNew(['email' => config('demo.email')]);
+        $user->forceFill([
+            'name' => 'Demo',
+            'password' => config('demo.password'),
+            'email_verified_at' => $user->email_verified_at ?? now(),
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+        ])->save();
+        $user->passkeys()->delete();
+
+        return $user;
     }
 
     /**

@@ -25,10 +25,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Called by the external scheduler (see .github/workflows/scheduler.yml), not by browsers.
-Route::post('cron/fees', [CronController::class, 'fees'])
+Route::controller(CronController::class)
+    ->prefix('cron')
+    ->name('cron.')
     ->middleware(VerifyCronToken::class)
     ->withoutMiddleware(PreventRequestForgery::class)
-    ->name('cron.fees');
+    ->group(function () {
+        Route::post('fees', 'fees')->name('fees');
+        Route::post('demo', 'demo')->name('demo');
+    });
 
 require __DIR__.'/settings.php';
 require __DIR__.'/tenant.php';

@@ -40,5 +40,6 @@ it('does not exist when no token is configured', function () {
 });
 
 it('skips the CSRF check, which tests never run', function () {
-    expect(Route::getRoutes()->getByName('cron.fees')?->excludedMiddleware())->toContain(PreventRequestForgery::class);
+    expect(Route::getRoutes()->getByName('cron.fees')?->excludedMiddleware())->toContain(PreventRequestForgery::class)
+        ->and(Route::getRoutes()->getByName('cron.demo')?->excludedMiddleware())->toContain(PreventRequestForgery::class);
 });

@@ -44,6 +44,21 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'tenant' => fn () => $this->tenantProps(),
+            'demo' => fn () => $this->demoProps($request),
+        ];
+    }
+
+    /**
+     * The published demo credentials, only on the public demo.
+     *
+     * @return array{email: string, password: string, isDemoUser: bool}|null
+     */
+    private function demoProps(Request $request): ?array
+    {
+        return config('demo.enabled') !== true ? null : [
+            'email' => (string) config('demo.email'),
+            'password' => (string) config('demo.password'),
+            'isDemoUser' => ProtectDemoAccount::isDemoUser($request),
         ];
     }
 

@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { Demo } from '@/types/demo';
 import type { Tenant } from '@/types/tenant';
 
 declare module 'react' {
@@ -14,6 +15,7 @@ declare module '@inertiajs/core' {
             auth: Auth;
             sidebarOpen: boolean;
             tenant: Tenant | null;
+            demo: Demo | null;
             [key: string]: unknown;
         };
     }

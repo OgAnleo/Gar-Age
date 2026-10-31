@@ -1,9 +1,9 @@
 name: scheduler
 
-# Render's free plan has no cron: this workflow does the nightly
-# `fees:generate` by calling the app's protected endpoint. Needs the
-# repository secrets APP_URL (e.g. https://gar-age.onrender.com) and
-# CRON_TOKEN (the same value as the app's CRON_TOKEN).
+# Render's free plan has no cron: this workflow does the nightly jobs by
+# calling the app's protected endpoints. Needs the repository secrets
+# APP_URL (e.g. https://gar-age.onrender.com) and CRON_TOKEN (the same
+# value as the app's CRON_TOKEN).
 
 on:
   schedule:
@@ -13,15 +13,25 @@ on:
 permissions: {}
 
 jobs:
-  fees:
+  nightly:
     runs-on: ubuntu-latest
 
+    env:
+      APP_URL: ${{ secrets.APP_URL }}
+      CRON_TOKEN: ${{ secrets.CRON_TOKEN }}
+
     steps:
+      # The free instance may be asleep: give it time to wake up.
+      - name: Reset the public demo
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --retry 5 --retry-delay 30 --retry-all-errors --max-time 180 \
+            --request POST \
+            --header "Authorization: Bearer ${CRON_TOKEN}" \
+            --header "Accept: application/json" \
+            "${APP_URL}/cron/demo"
+
       - name: Issue due fees
-        env:
-          APP_URL: ${{ secrets.APP_URL }}
-          CRON_TOKEN: ${{ secrets.CRON_TOKEN }}
-        # The free instance may be asleep: give it time to wake up.
         run: |
           curl --fail-with-body --silent --show-error \
             --retry 5 --retry-delay 30 --retry-all-errors --max-time 120 \

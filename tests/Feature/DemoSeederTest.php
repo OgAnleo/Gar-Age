@@ -21,14 +21,14 @@ it('builds a demo business with paid, pending and overdue fees, again and again'
     $tenant = Tenant::sole();
     $fees = Fee::withoutGlobalScopes()->get();
 
-    expect(User::where('email', DemoSeeder::EMAIL)->count())->toBe(1)
+    expect(User::where('email', config('demo.email'))->count())->toBe(1)
         ->and(Unit::withoutGlobalScopes()->count())->toBe(12)
         ->and(Customer::withoutGlobalScopes()->count())->toBe(8)
         ->and(Contract::withoutGlobalScopes()->count())->toBe(9)
         ->and($fees->whereNotNull('paid_on')->count())->toBeGreaterThan(5)
         ->and($fees->whereNull('paid_on')->count())->toBeGreaterThan(2);
 
-    $this->actingAs(User::where('email', DemoSeeder::EMAIL)->sole())
+    $this->actingAs(User::where('email', config('demo.email'))->sole())
         ->get("/{$tenant->slug}/dashboard")
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page

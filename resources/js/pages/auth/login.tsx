@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
+import DemoNotice from '@/components/demo-notice';
 import PasskeyVerify from '@/components/passkey-verify';
 
 type Props = {
@@ -21,6 +22,8 @@ export default function Login({ status, canResetPassword }: Props) {
     return (
         <>
             <Head title="Log in" />
+
+            <DemoNotice variant="login" />
 
             <PasskeyVerify />
 
