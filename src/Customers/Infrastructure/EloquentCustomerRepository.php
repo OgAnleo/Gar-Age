@@ -3,21 +3,22 @@
 namespace GarAge\Customers\Infrastructure;
 
 use App\Models\Customer as CustomerModel;
-use App\Tenancy\TenantScope;
 use GarAge\Customers\Domain\Customer;
 use GarAge\Customers\Domain\CustomerDetails;
 use GarAge\Customers\Domain\CustomerId;
 use GarAge\Customers\Domain\CustomerRepository;
 use GarAge\Customers\Domain\TaxId;
+use GarAge\Shared\Infrastructure\QueriesByTenant;
 use GarAge\Tenancy\Domain\TenantId;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Adapter: CustomerRepository port backed by Eloquent.
- * Scopes every query by tenant explicitly instead of relying on the global scope.
  */
 final class EloquentCustomerRepository implements CustomerRepository
 {
+    /** @use QueriesByTenant<CustomerModel> */
+    use QueriesByTenant;
+
     public function add(Customer $customer): CustomerId
     {
         $model = new CustomerModel($this->attributes($customer->details()));
@@ -55,18 +56,12 @@ final class EloquentCustomerRepository implements CustomerRepository
 
     public function taxIdTaken(TenantId $tenantId, TaxId $taxId, ?CustomerId $except = null): bool
     {
-        return $this->ofTenant($tenantId)
-            ->where('tax_id', $taxId->value)
-            ->when($except !== null, fn (Builder $query) => $query->whereKeyNot($except?->value))
-            ->exists();
+        return $this->existsExcept($this->ofTenant($tenantId)->where('tax_id', $taxId->value), $except);
     }
 
-    /**
-     * @return Builder<CustomerModel>
-     */
-    private function ofTenant(TenantId $tenantId): Builder
+    protected function modelClass(): string
     {
-        return CustomerModel::withoutGlobalScope(TenantScope::class)->where('tenant_id', $tenantId->value);
+        return CustomerModel::class;
     }
 
     /**

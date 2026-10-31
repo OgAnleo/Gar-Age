@@ -3,8 +3,8 @@
 namespace GarAge\Units\Application;
 
 use GarAge\Shared\Domain\InvalidValue;
+use GarAge\Shared\Domain\Money;
 use GarAge\Units\Domain\Area;
-use GarAge\Units\Domain\Money;
 use GarAge\Units\Domain\UnitCode;
 use GarAge\Units\Domain\UnitDetails;
 use GarAge\Units\Domain\UnitType;

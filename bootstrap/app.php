@@ -4,9 +4,11 @@ use App\Http\Middleware\EnsureTenantMember;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyTenant;
+use GarAge\Contracts\Domain\UnitAlreadyRented;
 use GarAge\Customers\Domain\CustomerTaxIdAlreadyUsed;
 use GarAge\Shared\Domain\InvalidValue;
 use GarAge\Shared\Domain\NotFound;
+use GarAge\Shared\Domain\StillInUse;
 use GarAge\Units\Domain\UnitCodeAlreadyUsed;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,6 +16,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -50,5 +53,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->map(CustomerTaxIdAlreadyUsed::class, fn () => ValidationException::withMessages([
             'tax_id' => 'Ya existe un cliente con ese DNI, NIE o CIF.',
         ]));
+        $exceptions->map(UnitAlreadyRented::class, fn () => ValidationException::withMessages([
+            'starts_on' => 'La unidad ya tiene un contrato en esas fechas.',
+        ]));
         $exceptions->map(InvalidValue::class, fn (InvalidValue $e) => new UnprocessableEntityHttpException($e->getMessage(), $e));
+
+        // Deleting something that other records still use: stay on the page with an error toast.
+        $exceptions->render(function (StillInUse $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'No se puede eliminar porque tiene contratos.']);
+
+            return back();
+        });
     })->create();

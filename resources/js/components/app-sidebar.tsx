@@ -1,11 +1,13 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
+    FileText,
     FolderGit2,
     LayoutGrid,
     Users,
     Warehouse,
 } from 'lucide-react';
+import ContractController from '@/actions/App/Http/Controllers/Tenant/ContractController';
 import CustomerController from '@/actions/App/Http/Controllers/Tenant/CustomerController';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import AppLogo from '@/components/app-logo';
@@ -40,6 +42,11 @@ function useMainNavItems(): NavItem[] {
         { title: 'Panel', href: tenantDashboard(), icon: LayoutGrid },
         { title: 'Unidades', href: UnitController.index(), icon: Warehouse },
         { title: 'Clientes', href: CustomerController.index(), icon: Users },
+        {
+            title: 'Contratos',
+            href: ContractController.index(),
+            icon: FileText,
+        },
     ];
 }
 

@@ -1,18 +1,11 @@
 import { Form } from '@inertiajs/react';
-import InputError from '@/components/input-error';
+import SelectField from '@/components/select-field';
+import type { SelectOption } from '@/components/select-field';
 import TextField from '@/components/text-field';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import type { RouteFormDefinition } from '@/wayfinder';
 
-export type UnitTypeOption = { value: string; label: string };
+export type UnitTypeOption = SelectOption;
 
 export type UnitFormValues = {
     code: string;
@@ -47,27 +40,14 @@ export default function UnitForm({
                         maxLength={20}
                         placeholder="G-01"
                     />
-
-                    <div className="grid gap-2">
-                        <Label htmlFor="type">Tipo</Label>
-                        <Select name="type" defaultValue={defaults?.type}>
-                            <SelectTrigger id="type" className="w-full">
-                                <SelectValue placeholder="Elige un tipo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {types.map((type) => (
-                                    <SelectItem
-                                        key={type.value}
-                                        value={type.value}
-                                    >
-                                        {type.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError message={errors.type} />
-                    </div>
-
+                    <SelectField
+                        label="Tipo"
+                        name="type"
+                        options={types}
+                        placeholder="Elige un tipo"
+                        defaultValue={defaults?.type}
+                        error={errors.type}
+                    />
                     <TextField
                         label="Superficie (m²)"
                         name="size_m2"
@@ -78,7 +58,6 @@ export default function UnitForm({
                         error={errors.size_m2}
                         required
                     />
-
                     <TextField
                         label="Precio mensual (€)"
                         name="monthly_price"

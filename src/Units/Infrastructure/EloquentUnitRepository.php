@@ -3,21 +3,22 @@
 namespace GarAge\Units\Infrastructure;
 
 use App\Models\Unit as UnitModel;
-use App\Tenancy\TenantScope;
+use GarAge\Shared\Infrastructure\QueriesByTenant;
 use GarAge\Tenancy\Domain\TenantId;
 use GarAge\Units\Domain\Unit;
 use GarAge\Units\Domain\UnitCode;
 use GarAge\Units\Domain\UnitDetails;
 use GarAge\Units\Domain\UnitId;
 use GarAge\Units\Domain\UnitRepository;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Adapter: UnitRepository port backed by Eloquent.
- * Scopes every query by tenant explicitly instead of relying on the global scope.
  */
 final class EloquentUnitRepository implements UnitRepository
 {
+    /** @use QueriesByTenant<UnitModel> */
+    use QueriesByTenant;
+
     public function add(Unit $unit): UnitId
     {
         $model = new UnitModel($this->attributes($unit->details()));
@@ -55,18 +56,12 @@ final class EloquentUnitRepository implements UnitRepository
 
     public function codeTaken(TenantId $tenantId, UnitCode $code, ?UnitId $except = null): bool
     {
-        return $this->ofTenant($tenantId)
-            ->where('code', $code->value)
-            ->when($except !== null, fn (Builder $query) => $query->whereKeyNot($except?->value))
-            ->exists();
+        return $this->existsExcept($this->ofTenant($tenantId)->where('code', $code->value), $except);
     }
 
-    /**
-     * @return Builder<UnitModel>
-     */
-    private function ofTenant(TenantId $tenantId): Builder
+    protected function modelClass(): string
     {
-        return UnitModel::withoutGlobalScope(TenantScope::class)->where('tenant_id', $tenantId->value);
+        return UnitModel::class;
     }
 
     /**

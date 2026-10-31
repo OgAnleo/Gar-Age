@@ -2,6 +2,8 @@
 
 namespace GarAge\Units\Domain;
 
+use GarAge\Shared\Domain\Money;
+
 /**
  * Everything that describes a unit, validated by its value objects.
  */

@@ -6,11 +6,27 @@
 */
 
 const FRAMEWORK = ['Illuminate', 'Laravel', 'Inertia', 'App'];
-const INFRASTRUCTURE = ['GarAge\Tenancy\Infrastructure', 'GarAge\Units\Infrastructure', 'GarAge\Customers\Infrastructure'];
-const APPLICATION = ['GarAge\Tenancy\Application', 'GarAge\Units\Application', 'GarAge\Customers\Application'];
+const INFRASTRUCTURE = [
+    'GarAge\Tenancy\Infrastructure',
+    'GarAge\Units\Infrastructure',
+    'GarAge\Customers\Infrastructure',
+    'GarAge\Contracts\Infrastructure',
+];
+const APPLICATION = [
+    'GarAge\Tenancy\Application',
+    'GarAge\Units\Application',
+    'GarAge\Customers\Application',
+    'GarAge\Contracts\Application',
+];
 
 arch('the domain is pure PHP and knows no outer layer')
-    ->expect(['GarAge\Shared\Domain', 'GarAge\Tenancy\Domain', 'GarAge\Units\Domain', 'GarAge\Customers\Domain'])
+    ->expect([
+        'GarAge\Shared\Domain',
+        'GarAge\Tenancy\Domain',
+        'GarAge\Units\Domain',
+        'GarAge\Customers\Domain',
+        'GarAge\Contracts\Domain',
+    ])
     ->not->toUse([...FRAMEWORK, ...APPLICATION, ...INFRASTRUCTURE]);
 
 arch('use cases depend only on the domain')
@@ -22,6 +38,9 @@ arch('repositories and services of the domain are ports')
         'GarAge\Tenancy\Domain\TenantRepository',
         'GarAge\Tenancy\Domain\Slugger',
         'GarAge\Units\Domain\UnitRepository',
+        'GarAge\Units\Domain\UnitUsage',
         'GarAge\Customers\Domain\CustomerRepository',
+        'GarAge\Customers\Domain\CustomerUsage',
+        'GarAge\Contracts\Domain\ContractRepository',
     ])
     ->toBeInterfaces();

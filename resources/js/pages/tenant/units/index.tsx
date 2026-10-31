@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import ConfirmDelete from '@/components/confirm-delete';
 import ResourceIndex from '@/components/resource-index';
+import { formatCents } from '@/lib/format';
 
 type Unit = {
     id: number;
@@ -11,11 +12,6 @@ type Unit = {
     size_m2: string;
     monthly_price_cents: number;
 };
-
-const euros = new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'EUR',
-});
 
 export default function UnitsIndex({ units }: { units: Unit[] }) {
     return (
@@ -43,7 +39,7 @@ export default function UnitsIndex({ units }: { units: Unit[] }) {
                             <td className="py-2">{unit.type_label}</td>
                             <td className="py-2 text-right">{unit.size_m2}</td>
                             <td className="py-2 text-right">
-                                {euros.format(unit.monthly_price_cents / 100)}
+                                {formatCents(unit.monthly_price_cents)}
                             </td>
                             <td className="py-2">
                                 <div className="flex items-center justify-end gap-2">

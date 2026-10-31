@@ -10,7 +10,9 @@ use GarAge\Units\Application\UpdateUnit;
 use GarAge\Units\Domain\UniqueUnitCode;
 use GarAge\Units\Domain\Unit;
 use GarAge\Units\Domain\UnitCodeAlreadyUsed;
+use GarAge\Units\Domain\UnitInUse;
 use GarAge\Units\Domain\UnitNotFound;
+use Tests\Doubles\FakeUsage;
 use Tests\Doubles\InMemoryUnitRepository;
 
 function unitInput(string $code = 'G-01', string $price = '79.99'): UnitInput
@@ -27,7 +29,8 @@ beforeEach(function () {
     $this->list = new ListUnits($units);
     $this->get = $getUnit;
     $this->update = new UpdateUnit($getUnit, $units, $uniqueCode);
-    $this->delete = new DeleteUnit($getUnit, $units);
+    $this->usage = new FakeUsage;
+    $this->delete = new DeleteUnit($getUnit, $units, $this->usage);
 
     $this->tenantA = new TenantId(1);
     $this->tenantB = new TenantId(2);
@@ -80,4 +83,12 @@ it('deletes a unit', function () {
     $this->delete->handle($this->tenantA, $id);
 
     expect($this->list->handle($this->tenantA))->toBe([]);
+});
+
+it('refuses to delete a unit that is still in use', function () {
+    $id = $this->create->handle($this->tenantA, unitInput());
+    $this->usage->inUse = true;
+
+    expect(fn () => $this->delete->handle($this->tenantA, $id))->toThrow(UnitInUse::class)
+        ->and($this->list->handle($this->tenantA))->toHaveCount(1);
 });

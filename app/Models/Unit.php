@@ -4,9 +4,9 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToTenant;
 use Database\Factories\UnitFactory;
+use GarAge\Shared\Domain\Money;
 use GarAge\Tenancy\Domain\TenantId;
 use GarAge\Units\Domain\Area;
-use GarAge\Units\Domain\Money;
 use GarAge\Units\Domain\Unit as DomainUnit;
 use GarAge\Units\Domain\UnitCode;
 use GarAge\Units\Domain\UnitDetails;

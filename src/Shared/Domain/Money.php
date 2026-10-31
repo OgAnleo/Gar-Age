@@ -1,9 +1,6 @@
 <?php
 
-namespace GarAge\Units\Domain;
-
-use GarAge\Shared\Domain\InvalidValue;
-use GarAge\Shared\Domain\TwoDecimalNumber;
+namespace GarAge\Shared\Domain;
 
 /**
  * Amount in euros kept as integer cents (79.99 € = 7999).

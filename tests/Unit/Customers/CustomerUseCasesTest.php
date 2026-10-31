@@ -7,10 +7,12 @@ use GarAge\Customers\Application\GetCustomer;
 use GarAge\Customers\Application\ListCustomers;
 use GarAge\Customers\Application\UpdateCustomer;
 use GarAge\Customers\Domain\Customer;
+use GarAge\Customers\Domain\CustomerInUse;
 use GarAge\Customers\Domain\CustomerNotFound;
 use GarAge\Customers\Domain\CustomerTaxIdAlreadyUsed;
 use GarAge\Customers\Domain\UniqueCustomerTaxId;
 use GarAge\Tenancy\Domain\TenantId;
+use Tests\Doubles\FakeUsage;
 use Tests\Doubles\InMemoryCustomerRepository;
 
 function customerInput(string $name = 'Ana López', string $taxId = '12345678Z', ?string $email = null): CustomerInput
@@ -27,7 +29,8 @@ beforeEach(function () {
     $this->list = new ListCustomers($customers);
     $this->get = $getCustomer;
     $this->update = new UpdateCustomer($getCustomer, $customers, $uniqueTaxId);
-    $this->delete = new DeleteCustomer($getCustomer, $customers);
+    $this->usage = new FakeUsage;
+    $this->delete = new DeleteCustomer($getCustomer, $customers, $this->usage);
 
     $this->tenantA = new TenantId(1);
     $this->tenantB = new TenantId(2);
@@ -94,4 +97,12 @@ it('deletes a customer', function () {
     $this->delete->handle($this->tenantA, $id);
 
     expect($this->list->handle($this->tenantA))->toBe([]);
+});
+
+it('refuses to delete a customer that is still in use', function () {
+    $id = $this->create->handle($this->tenantA, customerInput());
+    $this->usage->inUse = true;
+
+    expect(fn () => $this->delete->handle($this->tenantA, $id))->toThrow(CustomerInUse::class)
+        ->and($this->list->handle($this->tenantA))->toHaveCount(1);
 });
