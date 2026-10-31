@@ -1,7 +1,7 @@
 import { Form } from '@inertiajs/react';
 import InputError from '@/components/input-error';
+import TextField from '@/components/text-field';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
     Select,
@@ -38,18 +38,15 @@ export default function UnitForm({
         <Form {...action} className="space-y-6">
             {({ processing, errors }) => (
                 <>
-                    <div className="grid gap-2">
-                        <Label htmlFor="code">Código</Label>
-                        <Input
-                            id="code"
-                            name="code"
-                            defaultValue={defaults?.code}
-                            required
-                            maxLength={20}
-                            placeholder="G-01"
-                        />
-                        <InputError message={errors.code} />
-                    </div>
+                    <TextField
+                        label="Código"
+                        name="code"
+                        defaultValue={defaults?.code}
+                        error={errors.code}
+                        required
+                        maxLength={20}
+                        placeholder="G-01"
+                    />
 
                     <div className="grid gap-2">
                         <Label htmlFor="type">Tipo</Label>
@@ -71,35 +68,27 @@ export default function UnitForm({
                         <InputError message={errors.type} />
                     </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="size_m2">Superficie (m²)</Label>
-                        <Input
-                            id="size_m2"
-                            name="size_m2"
-                            type="number"
-                            step="0.01"
-                            min="0.5"
-                            defaultValue={defaults?.size_m2}
-                            required
-                        />
-                        <InputError message={errors.size_m2} />
-                    </div>
+                    <TextField
+                        label="Superficie (m²)"
+                        name="size_m2"
+                        type="number"
+                        step="0.01"
+                        min="0.5"
+                        defaultValue={defaults?.size_m2}
+                        error={errors.size_m2}
+                        required
+                    />
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="monthly_price">
-                            Precio mensual (€)
-                        </Label>
-                        <Input
-                            id="monthly_price"
-                            name="monthly_price"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            defaultValue={defaults?.monthly_price}
-                            required
-                        />
-                        <InputError message={errors.monthly_price} />
-                    </div>
+                    <TextField
+                        label="Precio mensual (€)"
+                        name="monthly_price"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        defaultValue={defaults?.monthly_price}
+                        error={errors.monthly_price}
+                        required
+                    />
 
                     <Button disabled={processing}>{submitLabel}</Button>
                 </>

@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Tenant;
 
-use App\Http\Controllers\Controller;
 use App\Http\Presenters\UnitPresenter;
 use App\Http\Requests\Tenant\UnitRequest;
 use App\Tenancy\CurrentTenant;
-use GarAge\Tenancy\Domain\TenantId;
 use GarAge\Units\Application\CreateUnit;
 use GarAge\Units\Application\DeleteUnit;
 use GarAge\Units\Application\GetUnit;
@@ -20,12 +18,14 @@ use Inertia\Response;
 /**
  * HTTP adapter: translates requests into Units use cases.
  */
-class UnitController extends Controller
+class UnitController extends TenantController
 {
     public function __construct(
-        private CurrentTenant $currentTenant,
+        CurrentTenant $currentTenant,
         private UnitPresenter $presenter,
-    ) {}
+    ) {
+        parent::__construct($currentTenant);
+    }
 
     /**
      * List the units of the current tenant.
@@ -88,15 +88,8 @@ class UnitController extends Controller
         return $this->backToIndex('Unidad eliminada.');
     }
 
-    private function tenantId(): TenantId
-    {
-        return $this->currentTenant->require()->id;
-    }
-
     private function backToIndex(string $message): RedirectResponse
     {
-        Inertia::flash('toast', ['type' => 'success', 'message' => $message]);
-
-        return to_route('tenant.units.index');
+        return $this->redirectWithToast('tenant.units.index', $message);
     }
 }

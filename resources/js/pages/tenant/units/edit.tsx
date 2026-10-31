@@ -1,6 +1,5 @@
-import { Head } from '@inertiajs/react';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
-import Heading from '@/components/heading';
+import FormPage from '@/components/form-page';
 import UnitForm, {
     type UnitFormValues,
     type UnitTypeOption,
@@ -14,17 +13,13 @@ export default function UnitsEdit({
     types: UnitTypeOption[];
 }) {
     return (
-        <>
-            <Head title={`Editar ${unit.code}`} />
-            <div className="max-w-xl p-4">
-                <Heading title={`Editar ${unit.code}`} />
-                <UnitForm
-                    action={UnitController.update.form({ unit: unit.id })}
-                    types={types}
-                    defaults={unit}
-                    submitLabel="Guardar cambios"
-                />
-            </div>
-        </>
+        <FormPage title={`Editar ${unit.code}`}>
+            <UnitForm
+                action={UnitController.update.form({ unit: unit.id })}
+                types={types}
+                defaults={unit}
+                submitLabel="Guardar cambios"
+            />
+        </FormPage>
     );
 }

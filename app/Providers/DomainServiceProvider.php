@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use GarAge\Customers\Domain\CustomerRepository;
+use GarAge\Customers\Infrastructure\EloquentCustomerRepository;
 use GarAge\Tenancy\Domain\Slugger;
 use GarAge\Tenancy\Domain\TenantRepository;
 use GarAge\Tenancy\Infrastructure\EloquentTenantRepository;
@@ -22,5 +24,6 @@ class DomainServiceProvider extends ServiceProvider
         TenantRepository::class => EloquentTenantRepository::class,
         Slugger::class => StrSlugger::class,
         UnitRepository::class => EloquentUnitRepository::class,
+        CustomerRepository::class => EloquentCustomerRepository::class,
     ];
 }

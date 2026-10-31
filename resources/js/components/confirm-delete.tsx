@@ -1,5 +1,4 @@
 import { Form } from '@inertiajs/react';
-import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -10,11 +9,17 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import type { RouteFormDefinition } from '@/wayfinder';
 
-export default function DeleteUnit({
-    unit,
+/**
+ * "Eliminar" link that asks for confirmation before submitting a destroy form.
+ */
+export default function ConfirmDelete({
+    title,
+    action,
 }: {
-    unit: { id: number; code: string };
+    title: string;
+    action: RouteFormDefinition<'post'>;
 }) {
     return (
         <Dialog>
@@ -24,12 +29,12 @@ export default function DeleteUnit({
                 </Button>
             </DialogTrigger>
             <DialogContent>
-                <DialogTitle>¿Eliminar la unidad {unit.code}?</DialogTitle>
+                <DialogTitle>{title}</DialogTitle>
                 <DialogDescription>
                     Esta acción no se puede deshacer.
                 </DialogDescription>
 
-                <Form {...UnitController.destroy.form({ unit: unit.id })}>
+                <Form {...action}>
                     {({ processing }) => (
                         <DialogFooter className="gap-2">
                             <DialogClose asChild>
