@@ -51,7 +51,7 @@ class HandleInertiaRequests extends Middleware
     /**
      * The published demo credentials, only on the public demo.
      *
-     * @return array{email: string, staffEmail: string, password: string, isDemoUser: bool}|null
+     * @return array{email: string, staffEmail: string, password: string, catalogUrl: string, isDemoUser: bool}|null
      */
     private function demoProps(Request $request): ?array
     {
@@ -59,6 +59,7 @@ class HandleInertiaRequests extends Middleware
             'email' => (string) config('demo.email'),
             'staffEmail' => (string) config('demo.staff_email'),
             'password' => (string) config('demo.password'),
+            'catalogUrl' => url('/'.config('demo.slug').'/disponibles'),
             'isDemoUser' => ProtectDemoAccount::isDemoUser($request),
         ];
     }

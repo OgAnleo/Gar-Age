@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import type { InertiaLinkProps } from '@inertiajs/react';
+import { Inbox } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -41,7 +42,14 @@ export default function ResourceIndex(props: Props) {
                 </div>
 
                 {isEmpty ? (
-                    <p className="text-sm text-muted-foreground">{emptyText}</p>
+                    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed bg-card px-6 py-12 text-center">
+                        <span className="flex size-12 items-center justify-center rounded-full bg-accent text-accent-foreground">
+                            <Inbox className="size-6" aria-hidden="true" />
+                        </span>
+                        <p className="max-w-md text-sm text-muted-foreground">
+                            {emptyText}
+                        </p>
+                    </div>
                 ) : (
                     children
                 )}

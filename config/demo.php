@@ -19,6 +19,9 @@ return [
 
     'staff_email' => 'empleado@gar-age.test',
 
+    // Slug of the demo business (from its name), for links to its public page.
+    'slug' => 'trasteros-demo',
+
     'password' => 'password',
 
 ];

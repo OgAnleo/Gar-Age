@@ -93,7 +93,7 @@ export default function FeesIndex({ fees }: { fees: Fee[] }) {
                 onValueChange={(value: Filter | '') =>
                     value && setFilter(value)
                 }
-                className="self-start"
+                className="max-w-full self-start overflow-x-auto"
                 aria-label="Filtrar cuotas por estado"
             >
                 {filters.map(({ value, label }) => (

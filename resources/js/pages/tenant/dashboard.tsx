@@ -1,4 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { AlertTriangle, Clock, PiggyBank, Warehouse } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import FeeController from '@/actions/App/Http/Controllers/Tenant/FeeController';
 import UnitController from '@/actions/App/Http/Controllers/Tenant/UnitController';
@@ -39,39 +41,85 @@ type Props = {
     }[];
 };
 
+type Tone = 'primary' | 'success' | 'warning' | 'danger' | 'muted';
+
+const toneClasses: Record<Tone, string> = {
+    primary: 'bg-primary/10 text-primary',
+    success: 'bg-success/15 text-success',
+    warning: 'bg-warning/15 text-warning',
+    danger: 'bg-destructive/10 text-destructive-foreground',
+    muted: 'bg-muted text-muted-foreground',
+};
+
 function Kpi({
     title,
     value,
     detail,
+    icon: Icon,
+    tone,
+    children,
 }: {
     title: string;
     value: string;
     detail: string;
+    icon: LucideIcon;
+    tone: Tone;
+    children?: ReactNode;
 }) {
     return (
         <Card className="gap-2">
-            <CardHeader>
-                <CardDescription>{title}</CardDescription>
-                <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
+            <CardHeader className="flex flex-row items-start justify-between gap-2">
+                <div className="space-y-1.5">
+                    <CardDescription>{title}</CardDescription>
+                    <CardTitle className="text-3xl tabular-nums">
+                        {value}
+                    </CardTitle>
+                </div>
+                <span
+                    className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${toneClasses[tone]}`}
+                >
+                    <Icon className="size-5" aria-hidden="true" />
+                </span>
             </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-                {detail}
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+                {children}
+                <p>{detail}</p>
             </CardContent>
         </Card>
+    );
+}
+
+function Meter({ percent }: { percent: number }) {
+    return (
+        <div
+            className="h-2 overflow-hidden rounded-full bg-muted"
+            role="meter"
+            aria-valuenow={percent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Ocupación"
+        >
+            <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${percent}%` }}
+            />
+        </div>
     );
 }
 
 function Panel({
     title,
     action,
+    className,
     children,
 }: {
     title: string;
     action?: ReactNode;
+    className?: string;
     children: ReactNode;
 }) {
     return (
-        <Card>
+        <Card className={className}>
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>{title}</CardTitle>
                 {action}
@@ -94,7 +142,7 @@ function RevenueChart({ months }: Props['revenue']) {
             role="img"
             aria-label="Cobrado en los últimos meses"
         >
-            {months.map(({ month, collected_cents }) => (
+            {months.map(({ month, collected_cents }, index) => (
                 <div
                     key={month}
                     className="flex h-full flex-1 flex-col items-center justify-end gap-1"
@@ -104,7 +152,7 @@ function RevenueChart({ months }: Props['revenue']) {
                         {formatCents(collected_cents)}
                     </span>
                     <div
-                        className="w-full rounded-t bg-primary"
+                        className={`w-full rounded-t ${index === months.length - 1 ? 'bg-primary' : 'bg-chart-2/70'}`}
                         style={{
                             height: `${(collected_cents / highest) * 100}%`,
                         }}
@@ -148,21 +196,31 @@ export default function TenantDashboard({
                         title="Ocupación hoy"
                         value={`${occupancy.percent} %`}
                         detail={`${occupancy.occupied} de ${occupancy.total} ${occupancy.total === 1 ? 'unidad ocupada' : 'unidades ocupadas'}`}
-                    />
+                        icon={Warehouse}
+                        tone="primary"
+                    >
+                        <Meter percent={occupancy.percent} />
+                    </Kpi>
                     <Kpi
                         title="Cobrado este mes"
                         value={formatCents(revenue.collected_cents)}
                         detail={`Emitido este mes: ${formatCents(revenue.issued_cents)}`}
+                        icon={PiggyBank}
+                        tone="success"
                     />
                     <Kpi
                         title="Cuotas pendientes"
                         value={formatCents(pending.amount_cents)}
                         detail={`${feesCount(pending.count)} dentro de plazo`}
+                        icon={Clock}
+                        tone="warning"
                     />
                     <Kpi
                         title="Cuotas vencidas"
                         value={formatCents(overdue.amount_cents)}
                         detail={`${feesCount(overdue.count)} fuera de plazo`}
+                        icon={AlertTriangle}
+                        tone={overdue.count > 0 ? 'danger' : 'muted'}
                     />
                 </div>
 
@@ -170,8 +228,9 @@ export default function TenantDashboard({
                     <RevenueChart {...revenue} />
                 </Panel>
 
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid gap-4 xl:grid-cols-5">
                     <Panel
+                        className="xl:col-span-3"
                         title="Cuotas vencidas"
                         action={<SeeAll href={FeeController.index()} />}
                     >
@@ -209,7 +268,7 @@ export default function TenantDashboard({
                                             <td className="py-2">
                                                 {formatDate(fee.due_on)}
                                             </td>
-                                            <td className="py-2 text-right">
+                                            <td className="py-2 text-right font-medium text-destructive-foreground">
                                                 {fee.days_overdue} d
                                             </td>
                                         </tr>
@@ -220,6 +279,7 @@ export default function TenantDashboard({
                     </Panel>
 
                     <Panel
+                        className="xl:col-span-2"
                         title={`Unidades libres hoy (${freeCount})`}
                         action={<SeeAll href={UnitController.index()} />}
                     >

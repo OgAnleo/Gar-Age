@@ -59,7 +59,7 @@ it('leaves other accounts alone, and the demo account when demo mode is off', fu
 
 it('shares the demo credentials, and whether the visitor is the demo account', function () {
     $this->get('/login')->assertInertia(fn (Assert $page) => $page
-        ->where('demo', ['email' => config('demo.email'), 'staffEmail' => config('demo.staff_email'), 'password' => 'password', 'isDemoUser' => false])
+        ->where('demo', ['email' => config('demo.email'), 'staffEmail' => config('demo.staff_email'), 'password' => 'password', 'catalogUrl' => url('/trasteros-demo/disponibles'), 'isDemoUser' => false])
     );
 
     config(['demo.enabled' => false]);
