@@ -7,6 +7,11 @@ its own space under `/{business-slug}`.
 Built with Laravel 13 + Inertia + React 19 + TypeScript, following a **hexagonal architecture**
 (ports & adapters) with a strict quality gate.
 
+**Live demo:** <https://gar-age.onrender.com> — log in as the owner `demo@gar-age.test` or the
+employee `empleado@gar-age.test` (password `password`), or open the demo business's
+[public page](https://gar-age.onrender.com/trasteros-demo/disponibles). The demo is rebuilt every
+night; on the free plan the first visit can take about a minute while the app wakes up.
+
 ## Features
 
 - **Units** — garages and storage units with area and a daily rate.
